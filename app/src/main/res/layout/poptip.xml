@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center">
+
+    <LinearLayout
+        android:id="@+id/lly_poptip_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_round_rectangle_bg"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:scrollbars="none">
+
+
+        <TextView
+            android:id="@+id/tv_poptip_content1"
+            android:layout_width="140dp"
+            android:layout_height="50dp"
+            android:gravity="center" />
+
+
+        <View
+            android:id="@+id/sub_line1"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@color/black_12"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/tv_poptip_content2"
+            android:layout_width="140dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/sub_line2"
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@color/black_12"
+            android:visibility="gone" />
+
+
+        <TextView
+            android:id="@+id/tv_poptip_content3"
+            android:layout_width="140dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <com.idyll.mutualcomm.view.PopTipView.ArrowView
+        android:id="@+id/arrowView"
+        android:layout_width="20dp"
+        android:layout_height="15dp" />
+
+</RelativeLayout>

@@ -16,7 +16,7 @@
         android:gravity="center"
         android:textSize="17sp"
         android:background="@color/default_shadow_color"
-        android:text="@string/stats"/>
+        android:text="@string/stats" />
 
     <TextView
         android:id="@+id/tv_edit"
@@ -26,6 +26,6 @@
         android:textSize="17sp"
         android:background="@color/red_btn_bg_color"
         android:gravity="center"
-        android:text="@string/edit"/>
+        android:text="@string/edit" />
 
 </LinearLayout>

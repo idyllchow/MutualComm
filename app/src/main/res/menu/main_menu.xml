@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/match_time"
+        android:title="matchTime"
+        app:actionLayout="@layout/btn_match_time"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/transition_action"
+        android:icon="@mipmap/ic_transition"
+        android:title="@string/transition"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/refresh_action"
+        android:icon="@mipmap/ic_refresh"
+        android:title="@string/refresh"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/cancel_action"
+        android:icon="@mipmap/ic_cancel_refresh"
+        android:title="@string/refresh"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/done_action"
+        android:icon="@mipmap/ic_done"
+        android:title="@string/complete"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/setting_action"
+        android:icon="@mipmap/ic_data_menu"
+        android:title="@string/export_data"
+        app:showAsAction="always"/>
+</menu>

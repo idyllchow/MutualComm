@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.idyll.mutualcomm.view.DragGridView
+        android:id="@+id/drag_gridView_left"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/G"
+        android:cacheColorHint="@android:color/transparent"
+        android:gravity="center"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="3"
+        android:scrollbars="none"
+        android:stretchMode="columnWidth" />
+
+    <com.idyll.mutualcomm.view.TransGridView
+        android:id="@+id/gv_player_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/G"
+        android:numColumns="4"
+        android:padding="1dp"
+        android:gravity="center"
+        android:scrollbars="none"
+        android:stretchMode="columnWidth"
+        android:layout_gravity="end" />
+
+
+    <com.idyll.mutualcomm.view.StatsDragGridView
+        android:id="@+id/drag_gridView_right"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:cacheColorHint="@android:color/transparent"
+        android:gravity="center"
+        android:scrollbars="none"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="4"
+        android:padding="1dp"
+        android:stretchMode="columnWidth" />
+    <!--android:background="@color/G"-->
+    <!--android:cacheColorHint="@android:color/transparent"-->
+    <!--android:gravity="center"-->
+    <!--android:listSelector="@android:color/transparent"-->
+    <!--android:numColumns="4"-->
+    <!--android:stretchMode="columnWidth"-->
+    <!--android:padding="1dp"-->
+    <!--android:layout_gravity="end"-->
+
+
+    <FrameLayout
+        android:id="@+id/animate_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <com.idyll.mutualcomm.view.FontTextView
+            android:id="@+id/animate_tv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@drawable/gray_circle_bg"
+            android:gravity="center"
+            android:textColor="@color/gray_text"
+            android:textSize="35sp"
+            app:fontStyle="lexia_bold" />
+    </FrameLayout>
+</FrameLayout>

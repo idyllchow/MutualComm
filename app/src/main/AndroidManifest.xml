@@ -12,8 +12,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!--允许应用程序完全使用网络-->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!--震动权限-->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
 
     <application
+        android:name=".comm.MCApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,6 +27,7 @@
         <activity
             android:name=".activity.LoginActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,6 +35,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.ChoosePlayerActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.StatsCommunicationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.StatsOperateActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activity.EditCommunicationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.EditEventActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

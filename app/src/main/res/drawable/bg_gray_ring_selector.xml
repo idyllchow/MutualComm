@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#3AD2DE" />
+                    <stroke android:width="1px" android:color="#ffffff" />
+                </shape>
+            </item>
+            <item android:bottom="1dp" android:left="1dp" android:right="1dp" android:top="1dp">
+                <shape android:shape="oval">
+                    <solid android:color="#3AD2DE" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_selected="true">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#3AD2DE" />
+                    <stroke android:width="1px" android:color="#ffffff" />
+                </shape>
+            </item>
+            <item android:bottom="1dp" android:left="1dp" android:right="1dp" android:top="1dp">
+                <shape android:shape="oval">
+                    <solid android:color="#3AD2DE" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+
+    <item android:state_pressed="false">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@color/white_4c" />
+                    <stroke android:width="1px" android:color="@color/white_4c" />
+                </shape>
+            </item>
+            <item android:bottom="1dp" android:left="1dp" android:right="1dp" android:top="1dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/white_4c" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_selected="false">
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="@color/white_4c" />
+                    <stroke android:width="1px" android:color="@color/white_4c" />
+                </shape>
+            </item>
+            <item android:bottom="1dp" android:left="1dp" android:right="1dp" android:top="1dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/white_4c" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

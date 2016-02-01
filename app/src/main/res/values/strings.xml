@@ -1,6 +1,91 @@
 <resources>
-    <string name="app_name">MutualComm</string>
+    <string name="app_name">统计工具进阶</string>
     <string name="action_settings">Settings</string>
     <string name="stats">我要统计</string>
     <string name="edit">我要编辑</string>
+
+    <string name="exit_prompt">再按一次退出程序</string>
+    <string name="prompt">提示</string>
+    <string name="complete">完成</string>
+    <string name="input_info">录入球员</string>
+
+    <string name="at_most_eleven">最多只能选择11名球员上场</string>
+    <string name="choose_player">请选择上场球员</string>
+
+
+    <string name="select_team">选择统计球队</string>
+    <string name="past_stats">过往统计</string>
+    <string name="transition">换人</string>
+    <string name="logout">登出</string>
+    <string name="clear">清除数据</string>
+    <string name="refresh">刷新</string>
+    <string name="next">下一步</string>
+    <string name="resend">重发</string>
+    <string name="failure_get_match_info">"获取球队阵容失败,请稍后再试"</string>
+    <!--统计界面文案-->
+    <string name="undo">撤销</string>
+    <string name="export_data">导出数据</string>
+    <string name="exit_stats">退出统计</string>
+
+    <string name="match_begin">比赛开始</string>
+    <string name="match_kick_off_first_half">上半场开始</string>
+    <string name="match_first_half">上半场  </string>
+    <string name="match_half_time">上半场结束</string>
+    <string name="match_intermission">中场休息</string>
+    <string name="match_kick_off_second_half">下半场开始</string>
+    <string name="match_second_half">下半场  </string>
+    <string name="match_second_half_end">下半场结束</string>
+    <string name="match_extra_time">加时赛</string>
+    <string name="match_kick_off_extra_time_first_half">加时赛上半场开始</string>
+    <string name="match_extra_time_first_half">加时上  </string>
+    <string name="match_extra_time_half_time">加时赛上半场结束</string>
+    <string name="match_extra_time_intermission">加时赛中场</string>
+    <string name="match_kick_off_extra_time_second_half">加时赛下半场开始</string>
+    <string name="match_extra_time_second_half">加时下  </string>
+    <string name="match_extra_time_full_time">加时赛下半场结束</string>
+    <string name="match_extra_time_end">加时结束</string>
+    <string name="match_penalty_shoot">点球大战</string>
+    <string name="match_penalty_shoot_out_begin">点球大战开始</string>
+    <string name="match_penalty_shoot_out_finish">点球大战结束</string>
+    <string name="match_finish">全场结束</string>
+
+    <string name="shot">射门</string>
+    <string name="shot_on_target">射正</string>
+    <string name="shot_off_target">射偏</string>
+    <string name="pass_ball">传球</string>
+    <string name="successful_pass">传球成功</string>
+    <string name="unsuccessful_pass">传球失败</string>
+    <string name="successful_take_on">过人成功</string>
+    <string name="unsuccessful_take_on">过人失败</string>
+    <string name="tackle">抢断</string>
+    <string name="tackle_won">抢断成功</string>
+    <string name="tackle_lost">抢断失败</string>
+    <string name="challenge">防守</string>
+    <string name="challenge_won">防守成功</string>
+    <string name="challenge_lost">防守失败</string>
+    <string name="interception">拦截</string>
+    <string name="clearance">解围</string>
+    <string name="save">扑救</string>
+    <string name="throw_in">界外球</string>
+    <string name="placement">定位球</string>
+    <string name="corner">角球</string>
+    <string name="free_kick">任意球</string>
+    <string name="penalty_kick">点球</string>
+    <string name="goal">进球</string>
+    <string name="goal_own">乌龙</string>
+    <string name="goal_assist">助攻</string>
+    <string name="key_pass">关键传球</string>
+    <string name="foul_conceded">犯规</string>
+    <string name="punish_card">罚牌</string>
+    <string name="yellow_card">黄牌</string>
+    <string name="red_card">红牌</string>
+    <string name="offside">越位</string>
+    <string name="ctrl">控球</string>
+    <string name="enter_the_pitch">球员上场</string>
+    <string name="leave_the_pitch">球员下场</string>
+    <string name="shot_on_target_penalty">点球射正</string>
+    <string name="shot_off_target_penalty">点球射偏</string>
+    <string name="goal_penalty">点球进球</string>
+    <string name="save_penalty">点球扑救</string>
+    <!--统计界面文案end-->
 </resources>

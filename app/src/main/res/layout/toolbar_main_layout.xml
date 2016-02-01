@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:paddingLeft="20dp"
+    android:layout_height="@dimen/tab_height"
+    android:layout_gravity="center"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/img_team_logo"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:scaleType="fitXY"
+        android:src="@mipmap/ic_team_small"
+        tools:ignore="contentDescription" />
+
+    <TextView
+        android:id="@+id/event_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="@string/stats"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+</LinearLayout>

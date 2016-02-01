@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.idyll.mutualcomm.view.RatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="@drawable/gray_round_rectangle_bg"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/action_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            tools:ignore="contentDescription" />
+
+        <TextView
+            android:id="@+id/action_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/R"
+            android:textSize="16sp" />
+    </LinearLayout>
+</com.idyll.mutualcomm.view.RatioFrameLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:fitsSystemWindows="true">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/lly_team_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                android:id="@+id/met_team_name"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:hint="点击输入球队名称"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textColorHint="@color/white"
+                android:textColor="@color/gray_btn_bg_color"
+                android:textSize="16sp"
+                app:met_baseColor="@color/white" />
+
+            <TextView
+                android:id="@+id/tv_input_player"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:text="选择上阵球员"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <com.sponia.basketballstats.view.OpbGridView
+                android:id="@+id/gv_player"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="20dp"
+                android:cacheColorHint="@android:color/transparent"
+                android:listSelector="@android:color/transparent"
+                android:horizontalSpacing="5dp"
+                android:numColumns="9"
+                android:scrollbars="none" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>

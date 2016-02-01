@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_edit_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginLeft="10dp"
+        android:gravity="center_vertical"
+        android:text="请输入统计手机ip和port: " />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_socket_id"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/tv_edit_prompt"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:hint="请输入编号用于连接"
+        android:inputType="number"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:singleLine="true"
+        android:visibility="gone" />
+
+    <com.rengwuxian.materialedittext.MaterialAutoCompleteTextView
+        android:id="@+id/met_ip_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/met_socket_id"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:focusable="false"
+        android:text="ip: " />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_ip"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/met_socket_id"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/met_ip_prompt"
+        android:hint="请输入统计手机ip" />
+
+    <com.rengwuxian.materialedittext.MaterialAutoCompleteTextView
+        android:id="@+id/met_port_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/met_socket_id"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/met_ip"
+        android:focusable="false"
+        android:text="port: " />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_port"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/met_socket_id"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:inputType="number"
+        android:layout_toRightOf="@+id/met_port_prompt"
+        android:hint="请输入端口"
+        android:text="7000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/met_port"
+        android:layout_marginTop="10dp"
+        android:background="@color/white_4d"
+        android:orientation="vertical">
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/met_send_content"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="60dp" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            android:text="send" />
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/btn_start_socket"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:text="开始编辑" />
+
+</RelativeLayout>

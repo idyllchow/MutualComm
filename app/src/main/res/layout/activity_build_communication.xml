@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/mtv_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:text="提示: 目前仅支持连接wifi模式,请在用于编辑的设备上输入以下ip/port建立连接"
+        android:textSize="17sp" />
+
+    <com.rengwuxian.materialedittext.MaterialAutoCompleteTextView
+        android:id="@+id/met_ip_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/mtv_prompt"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:focusable="false"
+        android:text="ip: " />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_ip"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/mtv_prompt"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/met_ip_prompt"
+        android:hint="本机ip" />
+
+    <com.rengwuxian.materialedittext.MaterialAutoCompleteTextView
+        android:id="@+id/met_port_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/mtv_prompt"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/met_ip"
+        android:focusable="false"
+        android:text="port: " />
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_port"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/mtv_prompt"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_toRightOf="@+id/met_port_prompt"
+        android:hint="请输入端口"
+        android:inputType="number"
+        android:text="7000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/met_port"
+        android:layout_marginTop="10dp"
+        android:background="@color/white_4d"
+        android:orientation="vertical">
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/met_send_content"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:text="send"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_start_socket"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:text="进入比赛" />
+
+</RelativeLayout>

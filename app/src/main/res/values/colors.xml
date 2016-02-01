@@ -3,4 +3,67 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="black">#000000</color>
+    <color name="opb_title">#3FC0FC</color>       //title文字背景
+    <color name="white_70">#B3FFFFFF</color>       //70%白
+    <color name="white_11">#1CFFFFFF</color>       //11%白
+    <color name="white_15">#26FFFFFF</color>       //15%白
+    <color name="white_89">#E3FFFFFF</color>       //89%白
+    <color name="op_bg">#F5F5F5</color>         //底层基本色
+    <color name="op_theme_dark">#C93927</color>      //按钮阴影颜色
+    <color name="op_theme_red_80">#FF6D59</color>
+    <color name="black_12">#1F000000</color>    //分隔线
+    <color name="black_26">#42000000</color>
+    <color name="black_56">#8F000000</color>
+    <color name="black_70">#B3000000</color>
+    <color name="black_87">#DE000000</color>
+    <color name="white_4c">#4Cffffff</color>
+    <color name="white_4d">#4Dffffff</color>
+    <color name="green_80">#803AD2DE</color> <!--action grid颜色-->
+    <color name="green">#3AD2DE</color> <!--action grid颜色-->
+    <color name="bg_menu">#2a2a2a</color> <!--action grid颜色-->
+    <color name="opb_green">#17c4c4</color> <!--action grid颜色-->
+
+    <color name="G">#363636</color>
+    <color name="R">#e44d2f</color>
+    <color name="R1">#e44d2f</color>
+    <color name="R3">#e55b43</color>
+    <color name="W1">#fcf6f5</color>
+    <color name="gray">#f0f0f0</color>
+    <color name="gray_text">#a5a5a5</color>
+    <color name="black_text">#3a3a3a</color>
+    <color name="bg_black">#303031</color>
+    <color name="white_alpha">#fcf9f9</color>
+    <color name="progressbar_color">#99ffffff</color>
+    <color name="B1">#292929</color>
+    <color name="B2">#343434</color>
+    <color name="B3">#5c5c5c</color>
+    <color name="G1">#3c3c3c</color>
+    <color name="op_theme_red_50">#FFA397</color>   //输入指示针和按钮不可用时的颜色
+    <color name="op_theme_red">#FF4E00</color>      //主题色、Navigation 文字、一些图标等
+    <color name="white">#ffffff</color>
+    <color name="part_white">#4Cffffff</color>
+
+
+    <color name="R4">#fadbd5</color>
+    <color name="text_gray">#999999</color>
+    <color name="transparent">#00000000</color>
+    <color name="op_theme_press">#E2412B</color>      //Button Press
+    <color name="op_red">#FF4830</color>        //负场
+    <color name="op_orange">#FF9C00</color>     //通知消息
+    <color name="op_yellow">#FFD83E</color>     //平手、图表
+    <color name="op_green">#88DC24</color>      //胜场、图表
+    <color name="op_green_dark">#69C731</color>  //绿色按钮阴影
+    <color name="op_blue">#35bfff</color>       //图表
+    <color name="op_gray">#FAFAFA</color>       //模块下的阴影
+    <color name="press">#7F000000</color>       //客户端内默认按下叠加的颜色
+    <color name="toast_bg">#212121</color>      //吐司的颜色
+    <color name="error_red">#FF0000</color>      //错误提示时使用
+    <color name="shadow_bar">#DCDCDC</color>      //标题栏,导航栏,操作栏的阴影
+    <color name="shadow_item">#F0F0F0</color>      //模块下的阴影
+    <color name="error_color">#FFDD2C00</color>
+    <color name="progress_color">#A5DC86</color>
+
+    <color name="wheel_timebtn_nor">#FF4E00</color>
+    <color name="wheel_timebtn_pre">#CCCCCC</color>
 </resources>

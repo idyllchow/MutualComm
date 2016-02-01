@@ -1,0 +1,30 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/tab_height"-->
+        <!--android:background="@color/black"-->
+        <!--app:navigationIcon="@mipmap/ic_undo"-->
+        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />-->
+
+    <FrameLayout
+        android:id="@+id/content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:id="@+id/fly_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:visibility="gone" />
+
+    <com.idyll.mutualcomm.view.PopTipView.PopTipRelativeLayout
+        android:id="@+id/ptrly_match_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>
