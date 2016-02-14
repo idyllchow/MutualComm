@@ -38,7 +38,6 @@ public class EditCommunicationActivity extends BaseActivity {
     }
 
     private void initUI() {
-//        setActionBarBackground(R.color.op_orange);
         setActionbarTitle("建立连接");
         setActionBarTitle2Center();
         met_socket_id = (MaterialEditText) findViewById(R.id.met_socket_id);

@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.entity.MCPlayerTextItem;
-import com.sponia.foundationmoudle.utils.LogUtil;
 
 import java.util.ArrayList;
 
@@ -75,7 +74,6 @@ public class MCPlayerAdapter extends BaseAdapter {
         MCPlayerTextItem item = players.get(position);
         if (players != null) { //背号有可能为0
             holder.tv.setText(item.player.Player_Num);
-            LogUtil.defaultLog("Player_Num----->" + item.player.Player_Num);
             holder.tv.setTextColor(mContext.getResources().getColor(R.color.black));
             holder.tv.setSelected(item.selected);
             holder.tv.setBackgroundResource(R.drawable.bg_black_ring_selector);

@@ -7,7 +7,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
@@ -19,13 +18,6 @@ import com.sponia.foundationmoudle.common.PreventContinuousClick;
 import com.sponia.foundationmoudle.utils.CellphoneUtil;
 import com.sponia.foundationmoudle.utils.SponiaToastUtil;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.net.Socket;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -43,20 +35,12 @@ public class StatsCommunicationActivity extends BaseActivity {
     private Button btnSend;
     private Button btnBootSocket;
     private String ip;
-    private String port;
+    private int port;
     private final ArrayList<String> playerNums = new ArrayList<>(Arrays.asList("1", "4", "6", "7", "9", "10", "11", "13", "22", "24", "25", "34", "44", "99"));
     private ArrayList<StatsMatchFormationBean> totalPlayers = new ArrayList<>();
-
-    private StringBuffer mConsoleStr = new StringBuffer();
-    private Socket mSocket;
-    private boolean isStartRecieveMsg;
-
-//    private SocketHandler mHandler;
-    protected BufferedReader mReader;
-    protected BufferedWriter mWriter;
     private MCSocketServer server;
-    private static final int MSG_START_SOCKET = 0x001;
-    private static final int MSG_START_ACTIVITY = 0x002;
+    private static final int MSG_START_ACTIVITY = 0x001;
+    private CommHandler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +60,7 @@ public class StatsCommunicationActivity extends BaseActivity {
         btnBootSocket = (Button) findViewById(R.id.btn_start_socket);
         btnBootSocket.setOnClickListener(new PreventContinuousClick(this));
         btnSend.setOnClickListener(new PreventContinuousClick(this));
-
+        handler = new CommHandler();
     }
 
     private void initData() {
@@ -98,12 +82,13 @@ public class StatsCommunicationActivity extends BaseActivity {
 
     private void startSocket() {
         server = new MCSocketServer();
-        port = metPort.getText().toString();
-        if (TextUtils.isEmpty(port)) {
+        String portStr = metPort.getText().toString();
+        if (TextUtils.isEmpty(portStr)) {
             SponiaToastUtil.showShortToast("请设置端口号");
             return;
         }
-        server.startSocket(Integer.parseInt(port));
+
+        server.startSocket(Integer.parseInt(portStr));
     }
 
     private void startSocketServer() {
@@ -115,27 +100,25 @@ public class StatsCommunicationActivity extends BaseActivity {
         }).start();
     }
 
-    Handler mHandler = new Handler() {
+    class CommHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case MSG_START_SOCKET:
-                    try {
-                        JSONObject json = new JSONObject((String) msg.obj);
-                        Toast.makeText(StatsCommunicationActivity.this, "收到新消息：" + msg, Toast.LENGTH_SHORT).show();
-                        mConsoleStr.append(json.getString("from") + ":" + json.getString("msg") + "   " + getTime(System.currentTimeMillis()) + "\n");
-                        SponiaToastUtil.showShortToast(mConsoleStr.toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
                 case MSG_START_ACTIVITY:
-                    if (server != null && server.getIsStartServer()) {
-                        startActivity(new Intent(StatsCommunicationActivity.this, StatsOperateActivity.class).putExtra("playerList", totalPlayers).putExtra("matchId", "matchId").putExtra("ip", ip).putExtra("port", port).putExtra("matchId", "matchIdSponia").putExtra("teamId", "teamIdSponia"));
-                    } else {
-                        SponiaToastUtil.showShortToast("端口已被占用,请更换端口或重启应用");
-                    }
+//                    if (server != null && server.getIsStartServer()) {
+//                    } else {
+//                        SponiaToastUtil.showShortToast("端口已被占用,请更换端口或重启应用");
+//                    }
+                    Intent intent = new Intent(StatsCommunicationActivity.this, StatsOperateActivity.class);
+                    intent.putExtra("playerList", totalPlayers);
+                    intent.putExtra("matchId", "matchId");
+                    intent.putExtra("ip", ip);
+                    intent.putExtra("port", Integer.parseInt(metPort.getText().toString()));
+                    intent.putExtra("matchID", "matchIdSponia");
+                    intent.putExtra("teamId", "teamIdSponia");
+                    intent.putExtra("matchType", 9);
+                    startActivity(intent);
                     break;
                 default:
                     break;
@@ -148,8 +131,10 @@ public class StatsCommunicationActivity extends BaseActivity {
         super.onClick(v);
         switch (v.getId()) {
             case R.id.btn_start_socket:
-                startSocketServer();
-                mHandler.sendEmptyMessageDelayed(MSG_START_ACTIVITY, 300);
+                if (server == null) {
+                    startSocketServer();
+                }
+                handler.sendEmptyMessageDelayed(MSG_START_ACTIVITY, 300);
                 break;
             case R.id.btn_send:
 //                send();
@@ -164,13 +149,5 @@ public class StatsCommunicationActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        isStartRecieveMsg = false;
-    }
-
-    private String getTime(long millTime) {
-        Date d = new Date(millTime);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(sdf.format(d));
-        return sdf.format(d);
     }
 }

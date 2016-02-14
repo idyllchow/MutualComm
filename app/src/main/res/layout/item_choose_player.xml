@@ -15,7 +15,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@color/black"
-        android:textSize="35sp"
+        android:textSize="@dimen/player_number_size"
         app:fontStyle="lexia_bold" />
 
 </com.idyll.mutualcomm.view.RatioFrameLayout>

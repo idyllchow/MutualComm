@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,8 @@ import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.activity.StatsOperateActivity;
-import com.idyll.mutualcomm.adapter.LeftDragAdapter;
-import com.idyll.mutualcomm.adapter.RightDragAdapter;
 import com.idyll.mutualcomm.adapter.StatsPlayerGVAdapter;
+import com.idyll.mutualcomm.adapter.SubstitutionDragAdapter;
 import com.idyll.mutualcomm.comm.MCConstants;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.fragment.StatsBaseFragment;
@@ -46,9 +46,9 @@ public class StatsTransitionFragment extends StatsBaseFragment {
     private DragGridView mDragLeftGridView;
     private StatsDragGridView mDragRightGridView;
     //场上球员
-    private LeftDragAdapter mDragLeftAdapter;
+    private SubstitutionDragAdapter mDragLeftAdapter;
     //场下球员
-    private RightDragAdapter mDragRightAdapter;
+    private SubstitutionDragAdapter mDragRightAdapter;
 
     private View mAnimateView;
     private TextView mAnimateTv;
@@ -65,7 +65,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
     public static StatsTransitionFragment getInstance(ArrayList<StatsMatchFormationBean> playerList, int matchType) {
         StatsTransitionFragment fragment = new StatsTransitionFragment();
         Bundle args = new Bundle();
-        LogUtil.defaultLog("getInstance playerList size " + playerList.size());
         if (playerList != null && playerList.size() > 0) {
             args.putParcelableArrayList("playerList", playerList);
             args.putInt("matchType", matchType);
@@ -77,7 +76,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogUtil.defaultLog("savedInstanceState == " + savedInstanceState + "; getArguments == " + getArguments());
         if (null != savedInstanceState) {
             mLeftItems = savedInstanceState.getParcelableArrayList("leftItems");
             mRightItems = savedInstanceState.getParcelableArrayList("rightItems");
@@ -85,7 +83,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
         } else if (null != getArguments()) {
             ArrayList<StatsMatchFormationBean> players = getArguments().getParcelableArrayList("playerList");
             matchType = getArguments().getInt("matchType");
-            LogUtil.defaultLog("playerList size " + players.size());
             generateDatas(players);
         }
     }
@@ -101,49 +98,43 @@ public class StatsTransitionFragment extends StatsBaseFragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_transition, null, false);
-
         mDragLeftGridView = (DragGridView) rootView.findViewById(R.id.drag_gridView_left);
         mGVPlayerBg = (TransGridView) rootView.findViewById(R.id.gv_player_bg);
         mDragRightGridView = (StatsDragGridView) rootView.findViewById(R.id.drag_gridView_right);
-        mDragLeftGridView.setStatusHeight(0);
-        mDragRightGridView.setStatusHeight(0);
 
-        int windowHeight = MCConstants.getScreenHeight() - getResources().getDimensionPixelOffset(R.dimen.tab_height);
-        int viewWidth = MCConstants.getScreenWidth() / 2;
-        int playerItemWidth = viewWidth / 3 - getResources().getDimensionPixelOffset(R.dimen.player_reduce_height);
+        int totalHeight = MCConstants.getScreenHeight() - getResources().getDimensionPixelOffset(R.dimen.tab_height);
+        int totalWidth = MCConstants.getScreenWidth() / 2;
 
         //以高度为准
-        if (windowHeight < viewWidth) {
-            viewWidth = windowHeight;
+        int rightItemWidth = totalHeight / MCConstants.ROW_PLAYER;
+//        itemTop = (leftItemWidth - rightItemWidth) / 2;
+//        itemLeft = (leftItemWidth - rightItemWidth) / 2;
+        int leftWidth = MCConstants.getScreenWidth() - totalHeight;
+        int padding = Math.abs(totalHeight / 4 - leftWidth / 5);
+        FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        fl.setMargins(0, padding / 2, 0, 0);
+        mDragLeftGridView.setLayoutParams(fl);
+        mDragLeftGridView.setVerticalSpacing(padding);
+
+        mDragLeftGridView.getLayoutParams().width = MCConstants.getScreenWidth() - totalHeight;
+        mDragLeftGridView.getLayoutParams().height = totalHeight;
+        mGVPlayerBg.getLayoutParams().width = totalHeight;
+        mGVPlayerBg.getLayoutParams().height = totalHeight;
+        mDragRightGridView.getLayoutParams().width = totalHeight;
+        mDragRightGridView.getLayoutParams().height = totalHeight;
+
+        int size = mLeftItems.size();
+        for (int i = size; i < MCConstants.TOTAL_PLAYERS; i++) {
+            mLeftItems.add(new StatsMatchFormationBean("", MCConstants.FILL_LAYOUT));
         }
-        int leftItemWidth = viewWidth / 3;
-        int rightItemWidth = windowHeight / 4;
-
-        itemTop = (leftItemWidth - rightItemWidth) / 2;
-        itemLeft = (leftItemWidth - rightItemWidth) / 2;
-        //设置左边球员fragment纵向间隙,选择球员时生效
-        if (matchType == MCConstants.MAX_ONFIELD_NINE) {
-            mDragLeftGridView.setVerticalSpacing(windowHeight / 3 - leftItemWidth);
-        } else if (matchType == MCConstants.MAX_ONFIELD_TWELVE) {
-            mDragLeftGridView.setVerticalSpacing(windowHeight / 4 - leftItemWidth);
-        }
-
-//        mDragLeftGridView.getLayoutParams().width = viewWidth;
-        mDragLeftGridView.getLayoutParams().width = MCConstants.getScreenWidth() - viewWidth;
-        mDragLeftGridView.getLayoutParams().height = windowHeight;
-        mDragRightGridView.getLayoutParams().width = windowHeight;
-        mDragRightGridView.getLayoutParams().height = windowHeight;
-
-        mGVPlayerBg.getLayoutParams().width = windowHeight;
-        mGVPlayerBg.getLayoutParams().height = windowHeight;
-
-        mDragLeftAdapter = new LeftDragAdapter(getActivity(), mLeftItems);
-        mDragRightAdapter = new RightDragAdapter(getActivity(), mRightItems);
+        mDragLeftAdapter = new SubstitutionDragAdapter(getActivity(), mLeftItems, true);
+        mDragRightAdapter = new SubstitutionDragAdapter(getActivity(), mRightItems, false);
         mPlayerBgAdapter = new StatsPlayerGVAdapter(getActivity());
         //设置左边球员item
-//        mDragLeftAdapter.setItemWidthAndHeight(playerItemWidth, playerItemWidth);
         mPlayerBgAdapter.setItemWidthAndHeight(rightItemWidth, rightItemWidth);
-        LogUtil.defaultLog("StatsTranstion onCreateView playerItemWidth " + playerItemWidth + "; leftItemWidth: " + leftItemWidth);
+//        mDragLeftAdapter.setItemWidthAndHeight(totalWidth / MCConstants.COLUMN_PLAYER_FIVE, (MCConstants.getScreenWidth() - totalHeight) / 4);
+        mDragLeftAdapter.setItemWidthAndHeight((MCConstants.getScreenWidth() - totalHeight) / 4, (MCConstants.getScreenWidth() - totalHeight) / 4);
+        LogUtil.defaultLog("fragment totalHeight: " + totalHeight + ";mItemHeight: " + totalHeight / MCConstants.ROW_PLAYER + "; mItemWidth: " + totalWidth / MCConstants.COLUMN_PLAYER_FIVE);
 
         mDragLeftGridView.setAdapter(mDragLeftAdapter);
         mDragRightGridView.setAdapter(mDragRightAdapter);
@@ -317,6 +308,9 @@ public class StatsTransitionFragment extends StatsBaseFragment {
                 LogUtil.defaultLog("mDragLeftGridView onItemClick() clickedPos: " + clickedPos);
                 ((StatsOperateActivity) getActivity()).hideTipView();
                 StatsMatchFormationBean player = mLeftItems.get(clickedPos);
+                if (TextUtils.isEmpty(player.id)) {
+                    return;
+                }
                 for (int i = 0, len = mRightItems.size(); i < len; i++) {
                     if (null == mRightItems.get(i)) {
                         mRightItems.set(i, player);

@@ -16,6 +16,6 @@ public class SocketMessage {
     public String matchTime;
     public String clientStartAt;
     public String time;//接收时间
-    public MCSocketServer.SocketThread thread;//
-
+    public MCSocketServer.SocketThread thread;
+    public String id;
 }

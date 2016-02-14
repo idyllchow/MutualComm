@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.idyll.mutualcomm.R;
@@ -31,10 +32,10 @@ import com.idyll.mutualcomm.comm.MCConstants;
 import com.idyll.mutualcomm.comm.SpCode;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.event.EventCode;
-import com.idyll.mutualcomm.event.MCRecordData;
 import com.idyll.mutualcomm.event.RecordFactory;
 import com.idyll.mutualcomm.fragment.statistics.StatsMatchFragment;
 import com.idyll.mutualcomm.fragment.statistics.StatsTransitionFragment;
+import com.idyll.mutualcomm.utils.AnimationUtil;
 import com.idyll.mutualcomm.view.PopTipView.PopTipRelativeLayout;
 import com.idyll.mutualcomm.view.PopTipView.PopTipView;
 import com.sponia.foundationmoudle.BaseActivity;
@@ -61,10 +62,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 /**
  * @packageName com.sponia.soccerstats.activities
@@ -142,9 +146,9 @@ public class StatsOperateActivity extends BaseActivity {
     //撤销事件编码
     private int eventCode = -1;
     //常规半场时间
-    private int ruleHalfTime;
+    private int halfTime;
     //加时半场时间
-    private int ruleExtraTime;
+    private int extraTime;
     //是否点球大战
     private boolean isPenalty = false;
     //所有球员
@@ -176,71 +180,70 @@ public class StatsOperateActivity extends BaseActivity {
     private boolean showTrans = false;
     private boolean showDone = false;
 
-
-    private StringBuffer mConsoleStr = new StringBuffer();
     private Socket mSocket;
     private boolean isStartRecieveMsg;
-
-    //    private SocketHandler mHandler;
     private BufferedReader mReader;
     private BufferedWriter mWriter;
     private String ip;
     private int port;
+
+    private OperateHandler handler;
+    private TextView tv_stats_title1;
+    private TextView tv_stats_title2;
+    /**
+     * 上一次事件描述
+     */
+    private String preEventDes = "";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addMidView(R.layout.activity_stats_operate);
+        initUI();
+        initData(savedInstanceState);
+        addMatchTimeView();
+        lastOnField.clear();
+        lastOnField.addAll(onFieldsList);
+        //存最近场上球员 防止换人时数据被清除
+        SponiaSpUtil.setDefaultSpValue(SpCode.MATCH_LINEUPS, lastOnField);
+    }
+
+    /**
+     * 初始化UI
+     */
+    private void initUI() {
         flyLayout = (FrameLayout) findViewById(R.id.fly_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setActionBarBackground(R.color.black);
-        initData();
+        initTitleMiddleView();
+        handler = new OperateHandler();
+    }
+
+    /**
+     * 初始化数据
+     */
+    private void initData(Bundle savedInstanceState) {
+        matchProcess = EventCode.Begin;
+        ptrlyMatchProgress = (PopTipRelativeLayout) findViewById(R.id.ptrly_match_progress);
+        statsMode = getIntent().getIntExtra("statsMode", 1);
+        matchId = getIntent().getStringExtra("matchId");
+        teamId = getIntent().getStringExtra("teamId");
+        halfTime = getIntent().getIntExtra("halfTime", 45);
+        extraTime = getIntent().getIntExtra("extraTime", 15);
+        timeDiff = getIntent().getLongExtra("timeDiff", 0);
+        playerList = getIntent().getParcelableArrayListExtra("playerList");
+        //matchType确定场上最多人数
+        matchType = getIntent().getIntExtra("matchType", 9);
+        ip = getIntent().getStringExtra("ip");
+        port = getIntent().getIntExtra("port", 7000);
+        spName = teamId + matchId;
+        initSocket();
         //只有第一次进入统计页面中时才会从SharedPreferences中读取数据，若从后台切换到前台则从内存恢复数据(在各自Fragment中完成)
-        if (savedInstanceState == null) {
-            restoreMatchProgress();
-            playerList = getIntent().getParcelableArrayListExtra("playerList");
-            distributionPlayer(false);
-        }
-        if (fragmentTransaction == null) {
-            fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        }
-        mMatchFragment = (StatsMatchFragment) getSupportFragmentManager().findFragmentByTag(MATCH_FRAGMENT);
-        addMatchFragment();
-        //事件区分为需要球员号码和不需要球员号码
-        mMatchFragment.setUpdateCallback(new StatsMatchFragment.UpdateToolBarCallback() {
-            @Override
-            public void update(MCRecordData data) {
-                if (null != data) {
-                    String playerId = data.getPlayer_id();
-                    int eventCode = Integer.parseInt(data.getCode());
-                    if (!TextUtils.isEmpty(playerId)) {
-                        if (eventCode == EventCode.Ctrl || eventCode == EventCode.EnterThePitch || eventCode == EventCode.LeaveThePitch) {//控球事件,换人事件不显示在title上,撤销时也不管title的显示(与传林沟通)
-                            mTitleState = "";
-                        } else {
-                            mTitleState = /*getShirtNumberByPlayerId(data.getPlayer_id())*/data.getPlayer_id() + "号" + EventCode.sEventNameMap.get(eventCode);
-                        }
-                    } else {
-                        mTitleState = EventCode.sEventNameMap.get(eventCode);
-                    }
+        restoreMatchProgress();
+        distributionPlayer(false);
 
-                    LogUtil.defaultLog("mTitleState: " + mTitleState + "; player num: " + data.getPlayer_id());
-
-                    if (!TextUtils.isEmpty(mTitleState)) {
-                        setActionbarTitle(mTitleState);
-                    }
-                } else {
-                    mTitleState = getString(R.string.stats);
-                    setActionbarTitle(mTitleState);
-                }
-                LogUtil.defaultLog("setActionbarTitle-----111---");
-            }
-        });
-        mTransitionFragment = (StatsTransitionFragment) getSupportFragmentManager().findFragmentByTag(TRANSITION_FRAGMENT);
-        addTranstionFragment();
-
-        if (null != savedInstanceState) { //从内存中恢复数据
-            LogUtil.defaultLog("savedInstanceState is not null restore from memory");
+        if (null != savedInstanceState) { //activity被kill后从内存中恢复数据
             fragmentTransaction.hide(mTransitionFragment);
             mTitleState = savedInstanceState.getString("titleState");
             matchProcess = savedInstanceState.getInt("matchProcess");
@@ -254,58 +257,64 @@ public class StatsOperateActivity extends BaseActivity {
             hasPenalty = savedInstanceState.getBoolean("hasPenalty");
             //如果比赛是在进行中,场上时间需要加上离开统计页面的时间
             leaveStatsTime = savedInstanceState.getLong(SpCode.MatchProgress.LEAVE_STATS_TIME);
-            LogUtil.defaultLog("leaveStatsTime == " + leaveStatsTime);
-            if (leaveStatsTime != 0l) {
+            if (leaveStatsTime != 0) {
                 leaveStatsTime = System.currentTimeMillis() - leaveStatsTime;
                 matchTime = matchTime + leaveStatsTime;
             }
             onFieldsList = (ArrayList<StatsMatchFormationBean>) savedInstanceState.getSerializable("onFieldsList");
-            showMainMenu();
-        } else {
-            if (null != onFieldsList && !onFieldsList.isEmpty()) {
+            showActionUI();
+        }
+        addFragment();
+        if (savedInstanceState == null) {
+            if (null != onFieldsList && !onFieldsList.isEmpty()) { //直接进入统计界面
                 fragmentTransaction.hide(mTransitionFragment);
-                showMainMenu();
-            } else {
-                showTransitionMenu();
-                LogUtil.defaultLog("setActionbarTitle-----222");
+                showActionUI();
+            } else { //换人界面
+                showTransitionUI();
             }
         }
+    }
+
+    private void addFragment() {
+        if (fragmentTransaction == null) {
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        }
+        addMatchFragment();
+        addSubstitutionFragment();
         fragmentTransaction.commitAllowingStateLoss();
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, this.getClass().getName());
-//        toolBar添加比赛时间
-        addMatchTimeView();
-        lastOnField.clear();
-        lastOnField.addAll(onFieldsList);
-        //存最近场上球员 防止换人时数据被清除
-        SponiaSpUtil.setDefaultSpValue(SpCode.MATCH_LINEUPS, lastOnField);
+    }
+
+    private void initTitleMiddleView() {
+        View view = getLayoutInflater().inflate(R.layout.item_title_middle, null);
+        tv_stats_title1 = (TextView) view.findViewById(R.id.tv_event_des1);
+        tv_stats_title2 = (TextView) view.findViewById(R.id.tv_event_des2);
+        setTitleMiddleView(view);
     }
 
     /**
-     * 初始化数据
+     * 刷新事件描述
+     *
+     * @param eventDes
+     * @param isUndo
      */
-    private void initData() {
-        matchProcess = EventCode.Begin;
-        ptrlyMatchProgress = (PopTipRelativeLayout) findViewById(R.id.ptrly_match_progress);
-        statsMode = getIntent().getIntExtra("statsMode", 1);
-        matchId = getIntent().getStringExtra("matchId");
-//        mTeam = getIntent().getParcelableExtra("team");
-        ruleHalfTime = getIntent().getIntExtra("ruleHalfTime", 45);
-        ruleExtraTime = getIntent().getIntExtra("ruleExtraTime", 15);
-        timeDiff = getIntent().getLongExtra("timeDiff", 0);
-        LogUtil.defaultLog("initData timeDiff: " + timeDiff);
-        //场上最多人数
-        if (getIntent().getIntExtra("matchType", MCConstants.MAX_ONFIELD_NINE) <= MCConstants.MAX_ONFIELD_NINE) {
-            matchType = MCConstants.MAX_ONFIELD_NINE;
-        } else {
-            matchType = MCConstants.MAX_ONFIELD_TWELVE;
+    public void updateEventDes(final String eventDes, boolean isUndo) {
+        if (!TextUtils.isEmpty(eventDes)) {
+            if (isUndo) {
+                tv_stats_title2.clearAnimation();
+                tv_stats_title2.setText(eventDes);
+                tv_stats_title1.setText(preEventDes);
+                preEventDes = eventDes;
+                tv_stats_title1.setAnimation(AnimationUtil.transAndAlaph(-1000));
+            } else {
+                tv_stats_title1.clearAnimation();
+                tv_stats_title1.setText(eventDes);
+                tv_stats_title2.setText(preEventDes);
+                preEventDes = eventDes;
+                tv_stats_title2.setAnimation(AnimationUtil.transAndAlaph(1000));
+            }
         }
-        teamId = "sponia";
-        spName = teamId + matchId;
-        ip = getIntent().getStringExtra("ip");
-        port = getIntent().getIntExtra("port", 7000);
-        initSocket();
     }
+
 
     /**
      * 分配场上场下队员
@@ -372,17 +381,17 @@ public class StatsOperateActivity extends BaseActivity {
         }
     }
 
-    public String getMatchId() {
-        return matchId;
-    }
-
     @Override
     protected void onResume() {
+        super.onResume();
+        if (mWakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, this.getClass().getName());
+        }
         mWakeLock.acquire();
         if (mMatchFragment != null) { //通知球员号码背景颜色变化
             mMatchFragment.changePlayerBackground(isPlaying, false);
         }
-        super.onResume();
     }
 
     @Override
@@ -446,14 +455,14 @@ public class StatsOperateActivity extends BaseActivity {
     /**
      * 换人fragment
      */
-    private void addTranstionFragment() {
+    private void addSubstitutionFragment() {
         if (mTransitionFragment == null) {
             mTransitionFragment = StatsTransitionFragment.getInstance(allList, matchType);
             fragmentTransaction.add(R.id.content_layout, mTransitionFragment, TRANSITION_FRAGMENT);
         }
     }
 
-    private Handler handler = new Handler() {
+    class OperateHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -487,16 +496,23 @@ public class StatsOperateActivity extends BaseActivity {
                 case MSG_SOCKET_INIT:
                     try {
                         JSONObject json = new JSONObject((String) msg.obj);
-                        mConsoleStr.append(json.getString("from") + ":" + json.getString("msg") + "   " + "\n");
+//                        mConsoleStr.append(json.getString("from") + ":" + json.getString("msg") + "   " + "\n");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    break;
+                case 8:
+
+                    tv_stats_title1.setText((String) msg.obj);
+                    tv_stats_title2.setText("");
                     break;
                 default:
                     break;
             }
         }
-    };
+    }
+
+    ;
 
     /**
      * 根据阶段设置比赛时间
@@ -541,11 +557,11 @@ public class StatsOperateActivity extends BaseActivity {
     public long getMatchTime() {
         String matchTimeStr = tvRight1.getText().toString().trim();
         if (matchTimeStr.contains(getString(R.string.match_second_half).trim())) { //下半场
-            return matchTime + ruleHalfTime * 60000;
+            return matchTime + halfTime * 60000;
         } else if (matchTimeStr.contains(getString(R.string.match_extra_time_first_half).trim())) { //加时上
-            return matchTime + (ruleHalfTime * 2) * 60000;
+            return matchTime + (halfTime * 2) * 60000;
         } else if (matchTimeStr.contains(getString(R.string.match_extra_time_second_half).trim())) { //加时下
-            return matchTime + (ruleHalfTime * 2) * 60000 + ruleExtraTime * 60000;
+            return matchTime + (halfTime * 2) * 60000 + extraTime * 60000;
         }
         return matchTime;
     }
@@ -652,7 +668,6 @@ public class StatsOperateActivity extends BaseActivity {
         if (null != players && 0 != players.size()) {
             HashMap<String, Integer> map = new HashMap<>();
             for (StatsMatchFormationBean player : players) {
-//                map.put(player.Player_Num + "", player.position);
                 map.put(player.id + "", player.position);
             }
             SponiaSpUtil.setDefaultSpValue(key, JSON.toJSONString(map, true));
@@ -694,8 +709,6 @@ public class StatsOperateActivity extends BaseActivity {
     private void substitution() {
         if (null != mTransitionFragment && mTransitionFragment.isVisible()) {
             ArrayList<StatsMatchFormationBean> onFieldList = mTransitionFragment.getOnFieldList();
-            LogUtil.defaultLog("---onFieldList size----" + onFieldList.size());
-            LogUtil.defaultLog("---onFieldList lastOnField size----" + lastOnField.size());
 
             long eventTime = System.currentTimeMillis();
             if (lastOnField.size() <= 0) { //比赛开始出场阵容
@@ -928,7 +941,7 @@ public class StatsOperateActivity extends BaseActivity {
         @Override
         public void onClick(SweetAlertDialog sweetAlertDialog) {
             sweetAlertDialog.dismiss();
-            uploadData();
+            exportData();
         }
     };
 
@@ -1135,29 +1148,6 @@ public class StatsOperateActivity extends BaseActivity {
         animator.start();
     }
 
-    private void uploadData() {
-        boolean result = mMatchFragment.uploadData();
-        if (!result) {
-            //result为false，表示正在通过网络上传数据
-            SponiaToastUtil.showShortToast("正在上传本地数据至服务器...");
-            mMatchFragment.setUploadCompleteCallback(new StatsMatchFragment.UploadCompleteCallback() {
-                @Override
-                public void complete(boolean isSuccess) {
-                    mMatchFragment.setUploadCompleteCallback(null);
-                    if (isSuccess) {
-                        SponiaToastUtil.showShortToast("数据已经成功上传至服务器上");
-                    } else {
-                        SponiaToastUtil.showShortToast("数据上传失败了");
-                    }
-                    exportData();
-                }
-            });
-        } else {
-            //数据已经上传完成，直接导出数据到文件中
-            exportData();
-        }
-    }
-
     /**
      * 导出本地数据
      */
@@ -1208,13 +1198,13 @@ public class StatsOperateActivity extends BaseActivity {
      */
     private void toggleToolBar() {
         if (null != mTransitionFragment && !mTransitionFragment.isDetached() && mTransitionFragment.isVisible()) {
-            showMainMenu();
+            showActionUI();
         } else {
-            showTransitionMenu();
+            showTransitionUI();
         }
     }
 
-    private void showMainMenu() {
+    private void showActionUI() {
         setActionbarTitleVisble();
         setTitleRight1TextColor(Color.parseColor("#FFFFFF"));
         setTitleRight1Background(R.drawable.bg_op_red);
@@ -1229,16 +1219,17 @@ public class StatsOperateActivity extends BaseActivity {
         showRefresh = false;
         showCancel = false;
 
-        setTitleLeftImg(R.mipmap.ic_undo);
+        setTitleLeftText("撤销");
+        setTitleLeftBackground(R.drawable.bg_op_red);
         if (!TextUtils.isEmpty(mTitleState)) {
-            setActionbarTitle(mTitleState);
+//            setActionbarTitle(mTitleState);
         }
     }
 
     /**
      * 显示换人界面
      */
-    private void showTransitionMenu() {
+    private void showTransitionUI() {
         setActionbarTitleGone();
         setTitleRight1Gone();
         setTitleRight2Image(R.mipmap.ic_refresh);
@@ -1251,29 +1242,6 @@ public class StatsOperateActivity extends BaseActivity {
         showCancel = false;
         showRefresh = true;
     }
-
-    /**
-     * 根据player_id获取球衣号码
-     */
-    private String getShirtNumberByPlayerId(String palyerId) {
-        for (StatsMatchFormationBean formationBean : playerList) {
-            if (palyerId.equals(teamId)) {
-                return "临时球员 ";
-            }
-            if (palyerId.equalsIgnoreCase(formationBean.id)) {
-                return formationBean.Player_Num + "号 ";
-            }
-        }
-        return "";
-    }
-
-
-    /**
-     * 获取比赛阵容
-     */
-//    private void getStatsMatchFormation() {
-//        new NetAction(this).excuteGet(StatsHostConst.MATCH_FORMATION.replace("match_id", matchId).replace("team_id", teamId), new NetMessage(TAG_GET_MATCH_FORMATION), true);
-//    }
 
     @Override
     public void onHttpSuccess(NetMessage netMsg, String responceData) {
@@ -1342,29 +1310,24 @@ public class StatsOperateActivity extends BaseActivity {
         }.execute();
     }
 
-    public String getSocketIDList() {
-
-        return SponiaSpUtil.getDefaultSpValue(SpCode.SOCKET_ID).toString();
-
-    }
-
     private void sendMsg(String msg, String playerNum, String eventCode, String matchTime, String clientStartAt) {
-        String socketArr[] = getSocketIDList().split("&");
-        int length = socketArr.length;
+        Set socketIDSet = (Set) SponiaSpUtil.getDefaultSpValue(SpCode.SOCKET_ID);
+        LogUtil.defaultLog("socketIDSet == " + socketIDSet);
         try {
             JSONObject json = new JSONObject();
-            for (int i = 0; i < length; i++) {
-                json.put("to", socketArr[i]);
+            Iterator<String> it = socketIDSet.iterator();
+            String uuid = UUID.randomUUID().toString();
+            while (it.hasNext()) {
+                json.put("to", it.next());
+                json.put("msg", msg);
+                json.put("playerNum", playerNum);
+                json.put("eventCode", eventCode);
+                json.put("matchTime", matchTime);
+                json.put("clientStartAt", clientStartAt);
+                json.put("id", uuid);
+                mWriter.write(json.toString() + "\n");
+                mWriter.flush();
             }
-            json.put("msg", msg);
-            json.put("playerNum", playerNum);
-            json.put("eventCode", eventCode);
-            json.put("matchTime", matchTime);
-            json.put("clientStartAt", clientStartAt);
-
-            mWriter.write(json.toString() + "\n");
-            mWriter.flush();
-            mConsoleStr.append("发送:" + msg + "   " + "\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1379,7 +1342,6 @@ public class StatsOperateActivity extends BaseActivity {
         }
         if (mMatchFragment != null) {
             getSupportFragmentManager().beginTransaction().remove(mMatchFragment).commitAllowingStateLoss();
-            mMatchFragment.setUpdateCallback(null);
             mMatchFragment = null;
         }
 

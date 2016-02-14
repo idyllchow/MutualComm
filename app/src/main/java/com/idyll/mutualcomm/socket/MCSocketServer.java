@@ -15,6 +15,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * @author shibo
@@ -32,7 +35,7 @@ public class MCSocketServer {
     /**
      * 线程队列，用于接收消息。每个客户机拥有一个线程，每个线程只接收发送给自己的消息
      */
-    private ArrayList<SocketThread> mThreadList = new ArrayList<SocketThread>();
+    private ArrayList<SocketThread> mThreadList = new ArrayList<>();
 
     /**
      * 开启SocketServer
@@ -41,15 +44,15 @@ public class MCSocketServer {
         try {
             if (mServer != null) {
                 mServer.close();
+                mServer = null;
             }
-            if (mServer == null) {
-                mServer = new ServerSocket();//创建一个ServerSocket,端口可以自己设置，但要和Client端的端口保持一致
-                mServer.setReuseAddress(true);
-                mServer.bind(new InetSocketAddress(port));
-            }
+            mServer = new ServerSocket();
+            mServer.setReuseAddress(true);
+            mServer.bind(new InetSocketAddress(port));
             LogUtil.defaultLog("启动server,端口：" + port);
-            Socket socket = null;
-            int socketID = 0;//Android（SocketClient）客户机的唯一标志，每个socketID表示一个Android客户机
+            Socket socket;
+            //Android（SocketClient）客户机的唯一标志，每个socketID表示一个Android客户机
+            int socketID = 0;
             //开启发送消息线程
             startSendMessageThread();
             isStartServer = true;
@@ -59,6 +62,7 @@ public class MCSocketServer {
                 //该线程会一直阻塞，直到有新的客户机加入，代码才会继续往下走
                 socket = mServer.accept();
                 //有新的客户机加入后，则创建一个新的SocketThread线程对象
+//                SocketThread thread = new SocketThread(socket, socketID++);
                 SocketThread thread = new SocketThread(socket, socketID++);
                 thread.start();
                 //将该线程添加到线程队列
@@ -68,10 +72,6 @@ public class MCSocketServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public boolean getIsStartServer() {
-        return isStartServer;
     }
 
     /**
@@ -89,6 +89,7 @@ public class MCSocketServer {
                         //判断消息队列中的长度是否大于0，大于0则说明消息队列不为空
                         if (mMsgList.size() > 0) {
                             //读取消息队列中的第一个消息
+                            LogUtil.defaultLog("startSendMessageThread--->");
                             SocketMessage from = mMsgList.get(0);
                             for (SocketThread to : mThreadList) {
                                 if (to.socketID == from.to) {
@@ -100,6 +101,7 @@ public class MCSocketServer {
                                     json.put("eventCode", from.eventCode);
                                     json.put("matchTime", from.matchTime);
                                     json.put("clientStartAt", from.clientStartAt);
+                                    json.put("id", from.id);
                                     json.put("time", from.time);
                                     //writer写进json中的字符串数据，末尾记得加换行符："\n"，否则在客户机端无法识别
                                     //因为BufferedReader.readLine()方法是根据换行符来读取一行的
@@ -128,23 +130,28 @@ public class MCSocketServer {
     public class SocketThread extends Thread {
 
         public int socketID;
-        public Socket socket;//Socket用于获取输入流、输出流
-        public BufferedWriter writer;//BufferedWriter 用于推送消息
-        public BufferedReader reader;//BufferedReader 用于接收消息
+        //Socket用于获取输入流、输出流
+        public Socket socket;
+        //BufferedWriter 用于推送消息
+        public BufferedWriter writer;
+        //BufferedReader 用于接收消息
+        public BufferedReader reader;
         private ArrayList<Integer> socketIDList = new ArrayList<>();
-        private StringBuffer socketIDBuffer = new StringBuffer();
-        private boolean isAdd = false;
 
+        Set socketIDSet = new HashSet();
 
         public SocketThread(Socket socket, int count) {
             socketID = count;
             this.socket = socket;
-            LogUtil.defaultLog("新增一台客户机, ID: " + socketID);
             socketIDList.add(socketID);
-            socketIDBuffer.append(socketID + "&");
-            LogUtil.defaultLog("socketIDList===>" + socketIDList.size());
-            SponiaSpUtil.setDefaultSpValue(SpCode.SOCKET_ID, socketIDBuffer.toString());
-//            SponiaSpUtil.setDefaultSpValue(SpCode.SOCKET_ADD, isAdd);
+            LogUtil.defaultLog("新增一台客户机, ID: " + socketID);
+            Set alreadySocket = (Set) SponiaSpUtil.getDefaultSpValue(SpCode.SOCKET_ID);
+            Iterator it = alreadySocket.iterator();
+            while (it.hasNext()) {
+                socketIDSet.add(it.next());
+            }
+            socketIDSet.add(socketID);
+            SponiaSpUtil.setDefaultSpValue(SpCode.SOCKET_ID, socketIDSet);
         }
 
         @Override
@@ -165,7 +172,7 @@ public class MCSocketServer {
                         从调用这个方法开始，该线程会一直处于阻塞状态，
                         直到接收到新的消息，代码才会往下走*/
                         String data = reader.readLine();
-                        //讲data作为json对象的内容，创建一个json对象
+                        //data作为json对象的内容，创建一个json对象
                         JSONObject json = new JSONObject(data);
                         //创建一个SocketMessage对象，用于接收json中的数据
                         SocketMessage msg = new SocketMessage();
@@ -175,11 +182,11 @@ public class MCSocketServer {
                         msg.eventCode = json.getString("eventCode");
                         msg.matchTime = json.getString("matchTime");
                         msg.clientStartAt = json.getString("clientStartAt");
+                        msg.id = json.getString("id");
                         msg.from = socketID;
                         //接收到一条消息后，将该消息添加到消息队列mMsgList
                         mMsgList.add(msg);
-                        LogUtil.defaultLog("收到一条消息：" + json.getString("msg") + " >>>> to socketID:" + json.getInt("to"));
-//                        Toast.makeText(Common.application, "收到一条消息：" + json.getString("msg") + " >>>> to socketID:" + json.getInt("to"), Toast.LENGTH_LONG).show();
+                        LogUtil.defaultLog("收到一条消息：" + json.getString("msg") + " >>>> to socketID:" + json.getInt("to") + "---id---" + msg.id);
                     }
                     //睡眠100ms，每100ms检测一次是否有接收到消息
                     Thread.sleep(100);

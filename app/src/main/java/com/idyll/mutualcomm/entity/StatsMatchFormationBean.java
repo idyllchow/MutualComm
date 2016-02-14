@@ -20,7 +20,7 @@ public class StatsMatchFormationBean extends SponiaBaseBean implements Comparabl
      * created_at : 2015-05-07 15:40:00
      * updated_at : 2015-09-08 08:58:47
      * team_id : 5538b7a3af146b532be033f9
-     * Player_Num : 9
+     * playerNum : 9
      * relation_id : 55e3a4629e319a5d6b802f9a
      * nationality : 中国
      * id : 554b8750af146b2288c9f3cd

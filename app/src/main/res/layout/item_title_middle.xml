@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:Tool="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:maxWidth="400dp"
+    >
+
+    <TextView
+        android:id="@+id/tv_event_des1"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:maxWidth="300dp"
+        android:textColor="@color/white"
+        android:textSize="19sp"
+        Tool:text="6号 进球" />
+
+    <TextView
+        android:id="@+id/tv_event_des2"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:maxWidth="300dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/white"
+        android:layout_toRightOf="@+id/tv_event_des1"
+        android:textSize="19sp"
+        Tool:text="6号 传球" />
+
+</RelativeLayout>

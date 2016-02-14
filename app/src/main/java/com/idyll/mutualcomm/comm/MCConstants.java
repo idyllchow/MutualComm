@@ -30,6 +30,8 @@ public class MCConstants {
      */
     public static final int MAX_ONFIELD_NINE = 9;
 
+    public static boolean isAdd = false;
+
     public interface TeamData {
         String TOTAL_PLAYERS = "total_players";
         String FIELD_PLAYERS = "field_players";
@@ -76,6 +78,7 @@ public class MCConstants {
 
     /**
      * 获取屏幕高度
+     *
      * @return
      */
     public static int getScreenHeight() {
@@ -87,6 +90,7 @@ public class MCConstants {
 
     /**
      * 获取屏幕宽度
+     *
      * @return
      */
     public static int getScreenWidth() {
@@ -97,4 +101,28 @@ public class MCConstants {
         return metrics.widthPixels;
     }
 
+    /**
+     * 球员行数
+     */
+    public static final int ROW_PLAYER = 4;
+
+    /**
+     * 球员列数5
+     */
+    public static final int COLUMN_PLAYER_FIVE = 5;
+
+    /**
+     * 球员列数4
+     */
+    public static final int COLUMN_PLAYER_FOUR = 4;
+
+    /**
+     * 用作填充gridview为球员占位
+     */
+    public static final String FILL_LAYOUT = "-88";
+
+    /**
+     * 总球员数
+     */
+    public static final int TOTAL_PLAYERS = 20;
 }

@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * @date 15/9/25
  */
 public class MCEventAdapter extends BaseAdapter {
-    private final ArrayList<MCRecordData> list;
+    private ArrayList<MCRecordData> list;
     private final LayoutInflater mInflater;
     private Context mContext;
     private int selectedItem = -1;
@@ -85,5 +85,10 @@ public class MCEventAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView tvEvent;
         TextView tvTime;
+    }
+
+    public void notifyDataSetChanged(ArrayList<MCRecordData> list) {
+        this.list = list;
+        notifyDataSetChanged();
     }
 }

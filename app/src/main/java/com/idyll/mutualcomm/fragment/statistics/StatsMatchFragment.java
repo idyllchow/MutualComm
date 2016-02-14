@@ -1,13 +1,10 @@
 package com.idyll.mutualcomm.fragment.statistics;
 
 import android.content.Context;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -17,24 +14,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.adapter.StatsActionAdapter;
 import com.idyll.mutualcomm.activity.StatsOperateActivity;
+import com.idyll.mutualcomm.adapter.StatsActionAdapter;
 import com.idyll.mutualcomm.adapter.StatsPlayerAdapter;
 import com.idyll.mutualcomm.comm.MCConstants;
 import com.idyll.mutualcomm.entity.MCPlayerTextItem;
 import com.idyll.mutualcomm.entity.StatsActionItem;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.event.EventCode;
+import com.idyll.mutualcomm.event.EventHelper;
 import com.idyll.mutualcomm.event.MCRecordData;
 import com.idyll.mutualcomm.event.RecordFactory;
 import com.idyll.mutualcomm.fragment.StatsBaseFragment;
 import com.idyll.mutualcomm.receiver.NetBroadcastReceiver;
+import com.idyll.mutualcomm.view.LineGridView;
 import com.sponia.foundationmoudle.utils.BigDecimalUtil;
 import com.sponia.foundationmoudle.utils.LogUtil;
-import com.sponia.foundationmoudle.utils.NetUtil;
 import com.sponia.foundationmoudle.utils.TimeUtil;
 
 import java.util.ArrayList;
@@ -49,9 +48,6 @@ import java.util.UUID;
  * @auther shibo
  */
 public class StatsMatchFragment extends StatsBaseFragment implements AdapterView.OnItemClickListener, View.OnTouchListener {
-    private final String TAG = "StatsMatchFragment";
-    //是否实时发送数据
-    private boolean isRealTime = true;
     //队员
     private ArrayList<MCPlayerTextItem> mItems = new ArrayList<>();
     //场上球员
@@ -59,7 +55,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     //等待上传的操作
     private final ArrayList<MCRecordData> mRecordWaitUploadDataList = new ArrayList<>();
     //保存所有的操作，用于撤销操作
-    private final ArrayList<MCRecordData> mRecordBackUpCancelList = new ArrayList<>();
+    private final ArrayList<MCRecordData> undoList = new ArrayList<>();
     //删除事件
     private final ArrayList<String> mDeleteEventList = new ArrayList<>();
     //比赛ID
@@ -73,7 +69,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     //标识选中球员
     private int mSelectedPosition = -1;
     //场上球员view
-    private GridView mPlayerGridView;
+    private LineGridView mPlayerGridView;
     //场下名单及action view
     private GridView mActionGridView;
     //球员adapter
@@ -88,13 +84,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     private int mNumberMusic;
     //选中球员时间
     private long mLastSelectedPlayerTime = 0l;
-    //toolbar回调
-    private UpdateToolBarCallback mUpdateCallback;
-    //上传事件完成回调
-    private UploadCompleteCallback mUploadCompleteCallback;
     //上传事件list
-//    private ArrayList<StatsUploadEventBean> uploadEventBeans;
-//    private ArrayList<StatsDeleteBean> deleteBean = new ArrayList();
     private ArrayList<String> deleteList = new ArrayList<>();
     //比赛模式
     private int statsMode;
@@ -119,22 +109,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     //服务器与本地时间差
     private long timeDiff = 0;
 
-    public interface UpdateToolBarCallback {
-        void update(MCRecordData data);
-    }
-
-    public interface UploadCompleteCallback {
-        void complete(boolean isSuccess);
-    }
-
-    public void setUpdateCallback(UpdateToolBarCallback callback) {
-        this.mUpdateCallback = callback;
-    }
-
-    public void setUploadCompleteCallback(UploadCompleteCallback callback) {
-        this.mUploadCompleteCallback = callback;
-    }
-
     /**
      * 用实体方式传值
      *
@@ -148,11 +122,11 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         StatsMatchFragment fragment = new StatsMatchFragment();
         Bundle args = new Bundle();
         args.putInt("statsMode", statsMode);
-        args.putInt("matchType", matchType);
+//        args.putInt("matchType", matchType);
+        args.putInt("matchType", 20);
         args.putParcelableArrayList("playerList", playerList);
         args.putString("matchId", matchId);
         args.putLong("timeDiff", timeDiff);
-//        args.putParcelable("team", team);
         fragment.setArguments(args);
         return fragment;
     }
@@ -175,7 +149,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             }
             temp = savedInstanceState.getParcelableArrayList("recordBackUpList");
             if (null != temp) {
-                mRecordBackUpCancelList.addAll(temp);
+                undoList.addAll(temp);
             }
             ArrayList<String> deleteEvents = savedInstanceState.getStringArrayList("deleteEventList");
             if (null != deleteEvents) {
@@ -210,7 +184,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         outState.putInt("selectedPosition", mSelectedPosition);
         outState.putLong("lastSelectedTime", mLastSelectedPlayerTime);
         outState.putParcelableArrayList("MCRecordDataList", mRecordWaitUploadDataList);
-        outState.putParcelableArrayList("recordBackUpList", mRecordBackUpCancelList);
+        outState.putParcelableArrayList("recordBackUpList", undoList);
         outState.putStringArrayList("deleteEventList", mDeleteEventList);
     }
 
@@ -248,20 +222,14 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             if (null != players) {
                 for (StatsMatchFormationBean player : players) {
                     if (mSelectedPlayer.Player_Num == player.Player_Num) {
-//                        selectedPos = player.position;
                         mSelectedPosition = selectedPos;
                         mSelectedPlayer = player;
-                        LogUtil.defaultLog("current choosed player: " + player.Player_Num + ", pos: " + selectedPos);
                     }
                 }
             }
-
             if (-1 == selectedPos) {
                 mSelectedPosition = -1;
                 mSelectedPlayer = null;
-                if (isRealTime) {
-                    handleRecordEvent();
-                }
             }
         }
 
@@ -278,30 +246,28 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_match, null, false);
-        mPlayerGridView = (GridView) rootView.findViewById(R.id.gridView_left);
+        mPlayerGridView = (LineGridView) rootView.findViewById(R.id.gridView_left);
         mActionGridView = (GridView) rootView.findViewById(R.id.gridView_right);
         //此处设置在选中确定后生效
-        int windowHeight = MCConstants.getScreenHeight() - getResources().getDimensionPixelOffset(R.dimen.tab_height);
-        int viewWidth = MCConstants.getScreenWidth() / 2;
-        int playerItemWidth = viewWidth / 3 - getResources().getDimensionPixelOffset(R.dimen.player_reduce_height);
+        int totalHeight = MCConstants.getScreenHeight() - getResources().getDimensionPixelOffset(R.dimen.tab_height);
+        int totalWidth = MCConstants.getScreenWidth() / 2;
 
-        if (windowHeight < viewWidth) {
-            viewWidth = windowHeight;
+        int leftWidth = MCConstants.getScreenWidth() - totalHeight;
+        int padding = Math.abs(totalHeight / 4 - leftWidth / 5);
+        FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        fl.setMargins(0, padding / 2, 0, 0);
+        mPlayerGridView.setLayoutParams(fl);
+        mPlayerGridView.setVerticalSpacing(padding);
+
+        mPlayerGridView.getLayoutParams().width = MCConstants.getScreenWidth() - totalHeight;
+        mPlayerGridView.getLayoutParams().height = totalHeight;
+        mActionGridView.getLayoutParams().width = totalHeight;
+        mActionGridView.getLayoutParams().height = totalHeight;
+
+        int size = mItems.size();
+        for (int i = size; i < MCConstants.TOTAL_PLAYERS; i++) {
+            mItems.add(new MCPlayerTextItem(new StatsMatchFormationBean("", MCConstants.FILL_LAYOUT)));
         }
-        int leftItemWidth = viewWidth / 3;
-
-        if (matchType == MCConstants.MAX_ONFIELD_NINE) {
-            mPlayerGridView.setVerticalSpacing(windowHeight / 3 - leftItemWidth);
-        } else if (matchType == MCConstants.MAX_ONFIELD_TWELVE) {
-            mPlayerGridView.setVerticalSpacing(windowHeight / 4 - leftItemWidth);
-        }
-
-//        mPlayerGridView.getLayoutParams().width = viewWidth;
-        mPlayerGridView.getLayoutParams().width = MCConstants.getScreenWidth() - viewWidth;
-        mPlayerGridView.getLayoutParams().height = windowHeight;
-        mActionGridView.getLayoutParams().width = viewWidth;
-        mActionGridView.getLayoutParams().height = windowHeight;
-
         mPlayerAdapter = new StatsPlayerAdapter(getActivity(), mItems);
         mActionAdapter = new StatsActionAdapter(getActivity(), generateActions(), matchType);
         mPlayerGridView.setAdapter(mPlayerAdapter);
@@ -310,11 +276,9 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         mPlayerGridView.setOnItemClickListener(this);
         mPlayerGridView.setOnTouchListener(this);
         mActionGridView.setOnTouchListener(this);
-        int itemWidth = viewWidth / 4;
-        int itemHeight = windowHeight / 4;
-//        mPlayerAdapter.setItemWidthAndHeight(playerItemWidth, playerItemWidth);
+        int itemWidth = totalWidth / 4;
+        int itemHeight = totalHeight / 4;
         mActionAdapter.setItemWidthAndHeight(itemWidth, itemHeight);
-        LogUtil.d(TAG, "onCreateView mPlayerGridView playerItemWidth: " + playerItemWidth + "; leftItemWidth: " + leftItemWidth);
         return rootView;
     }
 
@@ -324,207 +288,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         mVibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         mActionMusic = sp.load(getActivity(), R.raw.op_action, 1);
         mNumberMusic = sp.load(getActivity(), R.raw.op_number, 1);
-        LogUtil.d(TAG, "onActivityCreated upload size " + mRecordWaitUploadDataList.size());
-        if (null == savedInstanceState) {
-            handleDbDatas();
-        }
-        registerBroadcast();
-    }
-
-    /**
-     * 删除事件
-     */
-//    private void deleteEvent(ArrayList<String> eventId) {
-//        ArrayList<DeleteBean> deleteBeans = new ArrayList<>();
-//        int size = eventId.size();
-//        for (int i = 0; i < size; i++) {
-//            DeleteBean deleteBean = new DeleteBean(eventId.get(i));
-//            deleteBeans.add(deleteBean);
-//        }
-//        String params = JSON.toJSONString(deleteBeans, true);
-//        LogUtil.defaultLog("deleteEvent size: " + size + "; params: " + params);
-//        new NetAction(this).excuteDelete(StatsHostConst.DELETE_EVENTS.replace("match_id", matchId).replace("team_id", mTeam.id), params, new NetMessage(TAG_DELETE_EVENTS), true);
-//    }
-
-    /**
-     * 上传事件
-     */
-//    private void uploadEvent(ArrayList<?> event) {
-//        String params = JSON.toJSONString(event);
-//        LogUtil.defaultLog("uploadEvent params: " + params);
-//        new NetAction(this).excutePost(StatsHostConst.UPLOAD_EVENTS.replace("match_id", matchId).replace("team_id", mTeam.id), params, new NetMessage(TAG_UPLOAD_EVENTS), true);
-//    }
-
-//    @Override
-//    public void onHttpError(NetMessage netMsg, int errorCode, String errorMsg) {
-//        super.onHttpError(netMsg, errorCode, errorMsg);
-//        if (TAG_UPLOAD_EVENTS.equalsIgnoreCase(netMsg.getMessageId())) {
-//            handler.sendEmptyMessage(MSG_UPLOAD_EVENTS_FAILED);
-//        } else if (TAG_DELETE_EVENTS.equalsIgnoreCase(netMsg.getMessageId())) {
-//            handler.sendEmptyMessage(MSG_DELETE_EVENTS_FAILED);
-//        }
-//    }
-
-//    @Override
-//    public void onHttpSuccess(NetMessage netMsg, String responceData) {
-//        if (netMsg == null) {
-//            return;
-//        }
-//        if (TAG_UPLOAD_EVENTS.equalsIgnoreCase(netMsg.getMessageId())) {
-//            uploadEventBeans = (ArrayList) JSON.parseArray(responceData, StatsUploadEventBean.class);
-//            if (uploadEventBeans != null && uploadEventBeans.size() > 0) {
-//                handler.sendEmptyMessage(MSG_UPLOAD_EVENTS_SUCCESS);
-//            } else {
-//                handler.sendEmptyMessage(MSG_UPLOAD_EVENTS_FAILED);
-//            }
-//        } else if (TAG_DELETE_EVENTS.equalsIgnoreCase(netMsg.getMessageId())) {
-//            deleteBean = (ArrayList) JSON.parseArray(responceData, StatsDeleteBean.class);
-//            if (deleteBean != null && deleteBean.size() >= 0) {
-//                handler.sendEmptyMessage(MSG_DELETE_EVENTS_SUCCESS);
-//            } else {
-//                handler.sendEmptyMessage(MSG_DELETE_EVENTS_FAILED);
-//            }
-//        }
-//    }
-
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case MSG_DELETE_EVENTS_SUCCESS:
-                    dealEventDeleteSuccess();
-                    break;
-                case MSG_DELETE_EVENTS_FAILED:
-                    isDeleteEventFinished = true;
-                    LogUtil.defaultLog("删除事件失败");
-                    break;
-                case MSG_UPLOAD_EVENTS_SUCCESS:
-                    dealUploadEventSuccess();
-                    break;
-                case MSG_UPLOAD_EVENTS_FAILED:
-                    dealUploadEventFailed();
-                    break;
-            }
-        }
-    };
-
-    /**
-     * 上传事件成功后的操作
-     */
-    private void dealUploadEventSuccess() {}
-
-    /**
-     * 上传事件失败后的操作
-     */
-    private void dealUploadEventFailed() {}
-
-    /**
-     * 删除事件成功后的操作
-     */
-    private void dealEventDeleteSuccess() {}
-
-    private void registerBroadcast() {
-        if (null == mNetEventHandler) {
-            mNetEventHandler = new NetBroadcastReceiver.NetEventHandler() {
-                @Override
-                public void onNetChange(int state) {
-                    if (NetUtil.NETWORN_NONE != state) {
-                        //网络连通
-                        LogUtil.defaultLog("网络状态连通，开始发送数据...");
-                        if (0 != mDeleteEventList.size()) {
-                            isDeleteEventFinished = false;
-                            LogUtil.defaultLog("撤销队列不为空，正在发送网络请求...");
-//                            deleteEvent(mDeleteEventList);
-                        }
-                        if (0 != mRecordWaitUploadDataList.size()) {
-//                            LogUtil.defaultLog("register球员动作队列不为空,正在发送网络请求...");
-//                            LogUtil.defaultLog("registerBroadcast upload size " + mRecordWaitUploadDataList.size());
-//                            isHandleRecordEventFinished = false;
-//                            uploadEvent(mRecordWaitUploadDataList);
-                        }
-                    }
-                }
-            };
-        }
-        if (null == mReceiver) {
-            mReceiver = new NetBroadcastReceiver();
-            mReceiver.addNetEventHandler(mNetEventHandler);
-        }
-        getActivity().registerReceiver(mReceiver, new IntentFilter(NetBroadcastReceiver.NET_CHANGE_ACTION));
-    }
-
-    private void unRegisterBroadcast() {
-        if (null != mReceiver) {
-            getActivity().unregisterReceiver(mReceiver);
-            mReceiver.removeNetEventHandler(mNetEventHandler);
-            mReceiver = null;
-            mNetEventHandler = null;
-        }
-    }
-
-    /**
-     * 处理数据库中的事件
-     */
-    private void handleDbDatas() {
-        if (TextUtils.isEmpty(matchId)) {
-            matchId = ((StatsOperateActivity) getActivity()).getMatchId();
-        }
-        LogUtil.defaultLog("开始查询数据库：" + System.currentTimeMillis() + "; matchId: " + matchId);
-        List<MCRecordData> recordList = RecordFactory.queryRecords(matchId, teamId);
-        LogUtil.defaultLog("结束查询数据库：" + System.currentTimeMillis());
-        int size = recordList.size();
-        if (0 != size) {
-            LogUtil.defaultLog("数据库中的数据的size: " + size + ", 数据：" + recordList);
-            mRecordBackUpCancelList.ensureCapacity(size);
-            mRecordWaitUploadDataList.ensureCapacity(size);
-            for (MCRecordData MCRecordData : recordList) {
-                int code = Integer.parseInt(MCRecordData.getCode());
-                switch (Integer.parseInt(MCRecordData.getState())) {
-                    case 1:
-                        //标记为失败状态，以便下次可以重新提交
-                        MCRecordData.setState(MCRecordData.STATE_FAILED + "");
-                        mRecordWaitUploadDataList.add(MCRecordData);
-                        if (code != EventCode.Ctrl && code != EventCode.EnterThePitch && code != EventCode.LeaveThePitch) {
-                            mRecordBackUpCancelList.add(MCRecordData);
-                        }
-                        break;
-                    case 2:
-                        if (code != EventCode.Ctrl && code != EventCode.EnterThePitch && code != EventCode.LeaveThePitch) {
-                            mRecordBackUpCancelList.add(MCRecordData);
-                        }
-                        break;
-                    case 3:
-                        mRecordWaitUploadDataList.add(MCRecordData);
-                        if (code != EventCode.Ctrl && code != EventCode.EnterThePitch && code != EventCode.LeaveThePitch) {
-                            mRecordBackUpCancelList.add(MCRecordData);
-                        }
-                        break;
-                    case 4:
-                        if (!TextUtils.isEmpty(MCRecordData.get_id())) {
-                            mDeleteEventList.add(MCRecordData.get_id());
-                        }
-                        break;
-                }
-            }
-            LogUtil.defaultLog("处理数据结束：" + System.currentTimeMillis());
-            if (null != mUpdateCallback && 0 != mRecordBackUpCancelList.size()) {
-                mUpdateCallback.update(mRecordBackUpCancelList.get(mRecordBackUpCancelList.size() - 1));
-            }
-        }
-
-        if (0 != mDeleteEventList.size()) {
-            isDeleteEventFinished = false;
-            LogUtil.defaultLog("撤销队列不为空，正在发送网络请求...");
-//            deleteEvent(mDeleteEventList);
-        }
-
-        if (0 != mRecordWaitUploadDataList.size()) {
-//            LogUtil.defaultLog("db球员动作队列不为空,正在发送网络请求...");
-//            LogUtil.defaultLog("handleDbDatas upload size " + mRecordWaitUploadDataList.size());
-//            isHandleRecordEventFinished = false;
-//            uploadEvent(mRecordWaitUploadDataList);
-        }
     }
 
     @Override
@@ -535,18 +298,16 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         }
         if (R.id.gridView_left == parent.getId()) {
             MCPlayerTextItem selectItem = (MCPlayerTextItem) mPlayerAdapter.getItem(position);
-            if (null == selectItem) {
+            if (selectItem == null || TextUtils.isEmpty(selectItem.player.id)) {
                 return;
-            } else if (mSelectedPosition != position) {
+            }
+            if (mSelectedPosition != position) {
                 if (-1 != mSelectedPosition) {
                     MCPlayerTextItem lastSelectedItem = (MCPlayerTextItem) mPlayerAdapter.getItem(mSelectedPosition);
                     if (lastSelectedItem != null) {
                         lastSelectedItem.selected = false;
                         //换点球员后的控球事件
                         mLastSelectedPlayerTime = generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
-                    }
-                    if (isRealTime) {
-                        handleRecordEvent();
                     }
                 } else {
                     mLastSelectedPlayerTime = System.currentTimeMillis();
@@ -556,9 +317,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
                 mSelectedPlayer = selectItem.player;
             } else { //控球事件
                 generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
-                if (isRealTime) {
-                    handleRecordEvent();
-                }
                 //取消选中的球员
                 selectItem.selected = false;
                 mSelectedPlayer = null;
@@ -625,7 +383,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     }
 
     private void touchUp(int position) {
-//        Log.e(TAG, "touchUp() action:" + event.getAction() + " x: " + event.getX() + ", y:" + event.getY());
         StatsActionItem item = (StatsActionItem) mActionAdapter.getItem(position);
         int menuClass = mActionAdapter.getMenuClass();
         if (item == null) {
@@ -683,7 +440,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     }
 
     private void touchDown(int position) {
-//        Log.e(TAG, "touchDown() action:" + event.getAction() + " x: " + event.getX() + ", y:" + event.getY());
         lastTouchPosition = position;
         StatsActionItem item = (StatsActionItem) mActionAdapter.getItem(position);
         int menuClass = mActionAdapter.getMenuClass();
@@ -700,8 +456,6 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         if (null != view) {
             view.getChildAt(0).setBackgroundResource(R.drawable.white_round_rectangle_bg);
         }
-
-
     }
 
     private void resetState() {
@@ -735,7 +489,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
                 LogUtil.defaultLog(code + " not begin,event invalid！");
                 return 0;
             }
-            if ((matchProgress == EventCode.PenaltyShootOutBegin || matchProgress == EventCode.PenaltyShootOutFinish)&& code == EventCode.Ctrl) { //点球阶段无控球事件
+            if ((matchProgress == EventCode.PenaltyShootOutBegin || matchProgress == EventCode.PenaltyShootOutFinish) && code == EventCode.Ctrl) { //点球阶段无控球事件
                 LogUtil.defaultLog(code + " penalty shoot,ctrl event invalid！");
                 return 0;
             }
@@ -791,16 +545,11 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             mRecordWaitUploadDataList.add(MCRecordData);
         }
         if (MCRecordData != null && code != EventCode.Ctrl && code != EventCode.EnterThePitch && code != EventCode.LeaveThePitch) {
-            mRecordBackUpCancelList.add(MCRecordData);
+            undoList.add(MCRecordData);
         }
 
-        if (MCRecordData != null && mUpdateCallback != null) {
-            mUpdateCallback.update(MCRecordData);
-        }
+        ((StatsOperateActivity) getActivity()).updateEventDes(EventHelper.getEventDes(code, playedId), false);
 
-        if (isRealTime) {
-            handleRecordEvent();
-        }
         return currentTime;
     }
 
@@ -815,170 +564,54 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         MCRecordData updateData = null;
         MCRecordData lastMCRecordData = null;
         int state = MCRecordData.STATE_NOT_COMMIT;
-        if (isRealTime) {
-            //实时操作
-            synchronized (mRecordBackUpCancelList) {
-                if (0 != mRecordBackUpCancelList.size()) {
-                    lastMCRecordData = mRecordBackUpCancelList.get(mRecordBackUpCancelList.size() - 1);
-                    state = Integer.parseInt(lastMCRecordData.getState());
-                    LogUtil.defaultLog("撤销动作：" + lastMCRecordData.getEvent_detail() + ", 当前状态：" + state + "; serverId: " + lastMCRecordData.get_id());
-                    if (MCRecordData.STATE_SUCCESS == state) {
-                        //提交成功的数据将不会出现在mMCRecordDataList队列中
-                        LogUtil.defaultLog("cacel size " + mRecordBackUpCancelList.size());
-                        mRecordBackUpCancelList.remove(lastMCRecordData);
-                        LogUtil.defaultLog("cacel size " + mRecordBackUpCancelList.size());
-                    } else {
-                        mRecordBackUpCancelList.remove(lastMCRecordData);
-                        mRecordWaitUploadDataList.remove(lastMCRecordData);
-                    }
-
-                    if (mRecordBackUpCancelList.size() > 0) {
-                        updateData = mRecordBackUpCancelList.get(mRecordBackUpCancelList.size() - 1);
-                    }
-
-                    if (null != mUpdateCallback) {
-                        mUpdateCallback.update(updateData);
-                    }
-                }
-            }
-
-            //处理一些比较耗时的操作，不放在同步块中进行
-            if (null != lastMCRecordData) {
-                mVibrator.vibrate(50); //震动一下
-                if (MCRecordData.STATE_FAILED == state) {//上传失败的操作，直接从本地数据库中删除
-                    LogUtil.defaultLog("直接从本地数据库中删除：" + lastMCRecordData);
-                    RecordFactory.deleteRecordByEventKey(lastMCRecordData.getEvent_detail());
+        //实时操作
+        int size = undoList.size();
+        synchronized (undoList) {
+            if (size != 0) {
+                lastMCRecordData = undoList.get(size - 1);
+                state = Integer.parseInt(lastMCRecordData.getState());
+                if (MCRecordData.STATE_SUCCESS == state) {
+                    //提交成功的数据将不会出现在mMCRecordDataList队列中
+                    undoList.remove(lastMCRecordData);
                 } else {
-                    //将数据库中的记录状态更新为撤销状态，然后等网络请求成功后从数据库中删除
-                    if (lastMCRecordData.getEvent_detail() != null && lastMCRecordData.getEvent_detail().length() < 32) {
-                        mDeleteEventList.add(lastMCRecordData.getEvent_detail());
-                    }
-                    if (!TextUtils.isEmpty(lastMCRecordData.get_id())) {
-                        mDeleteEventList.add(lastMCRecordData.get_id());
-                        LogUtil.d(TAG, "undo event_key: " + lastMCRecordData.getEvent_detail() + "; undo server_id: " + lastMCRecordData.get_id());
-                    }
-                    LogUtil.defaultLog("current queue data:" + mDeleteEventList);
-                    if (isDeleteEventFinished) {
-                        isDeleteEventFinished = false;
-                        LogUtil.defaultLog("send delete request");
-//                        deleteEvent(mDeleteEventList);
-                    } else {
-                        LogUtil.defaultLog("the lasted delete quest is not return,waiting...");
-                    }
-                    lastMCRecordData.setState(MCRecordData.STATE_UNDO + "");
-                    LogUtil.defaultLog("更新数据库中数据的状态为撤销状态:" + lastMCRecordData);
-                    RecordFactory.updateRecord(lastMCRecordData);
+                    undoList.remove(lastMCRecordData);
+                    mRecordWaitUploadDataList.remove(lastMCRecordData);
                 }
-            }
-        } else {
-            synchronized (mRecordBackUpCancelList) {
-                if (0 != mRecordBackUpCancelList.size()) {
-                    lastMCRecordData = mRecordBackUpCancelList.get(mRecordBackUpCancelList.size() - 1);
-                    state = Integer.parseInt(lastMCRecordData.getState());
-                    if (MCRecordData.STATE_NOT_COMMIT == state) {
-                        //还未提交
-                        LogUtil.defaultLog("撤销未提交的动作：" + lastMCRecordData.getEvent_detail());
-                        mRecordBackUpCancelList.remove(lastMCRecordData);
-                        mRecordWaitUploadDataList.remove(lastMCRecordData);
-                    } else if (MCRecordData.STATE_COMMITED == state) {
-                        LogUtil.defaultLog("撤销提交未有结果的动作：" + lastMCRecordData.getEvent_detail());
-                        mRecordBackUpCancelList.remove(lastMCRecordData);
-                    }
+                ((StatsOperateActivity) getActivity()).updateEventDes(EventHelper.getEventDes(Integer.parseInt(lastMCRecordData.getCode()), lastMCRecordData.getPlayer_id()), true);
 
-                    if (0 != mRecordBackUpCancelList.size()) {
-                        updateData = mRecordBackUpCancelList.get(mRecordBackUpCancelList.size() - 1);
-                    }
-                }
-            }
-
-            if (null != mUpdateCallback) {
-                mUpdateCallback.update(updateData);
-            }
-
-            if (null != lastMCRecordData) {
-                mVibrator.vibrate(50); //震动一下
-                if (MCRecordData.STATE_COMMITED == state) {
-                    //对于已经提交的操作，从数据库中删除
-                    LogUtil.d(TAG, "delete db record server id: " + lastMCRecordData.get_id() + "; event key: " + lastMCRecordData.getEvent_detail());
-                    RecordFactory.deleteRecordByEventKey(lastMCRecordData.getEvent_detail());
-                }
             }
         }
+
+        //处理一些比较耗时的操作，不放在同步块中进行
+        if (null != lastMCRecordData) {
+            mVibrator.vibrate(50); //震动一下
+            if (MCRecordData.STATE_FAILED == state) {//上传失败的操作，直接从本地数据库中删除
+                LogUtil.defaultLog("直接从本地数据库中删除：" + lastMCRecordData);
+                RecordFactory.deleteRecordByEventKey(lastMCRecordData.getEvent_detail());
+            } else {
+                //将数据库中的记录状态更新为撤销状态，然后等网络请求成功后从数据库中删除
+                if (lastMCRecordData.getEvent_detail() != null && lastMCRecordData.getEvent_detail().length() < 32) {
+                    mDeleteEventList.add(lastMCRecordData.getEvent_detail());
+                }
+                if (!TextUtils.isEmpty(lastMCRecordData.get_id())) {
+                    mDeleteEventList.add(lastMCRecordData.get_id());
+                }
+                if (isDeleteEventFinished) {
+                    isDeleteEventFinished = false;
+//                        deleteEvent(mDeleteEventList);
+                } else {
+                    LogUtil.defaultLog("the lasted delete quest is not return,waiting...");
+                }
+                lastMCRecordData.setState(MCRecordData.STATE_UNDO + "");
+                LogUtil.defaultLog("更新数据库中数据的状态为撤销状态:" + lastMCRecordData);
+                RecordFactory.updateRecord(lastMCRecordData);
+            }
+        }
+
         if (lastMCRecordData == null) {
             return -1;
         }
         return TextUtils.isEmpty(lastMCRecordData.getCode()) ? -1 : Integer.parseInt(lastMCRecordData.getCode());
-    }
-
-    /**
-     * 处理RecordEvent是否已结束，当发起网络请求时置为false,等网络数据返回处理完成置为true
-     */
-    private boolean isHandleRecordEventFinished = true;
-
-    /**
-     * 处理事件
-     *
-     * @return 是否已经处理完成，当有网络请求时返回false
-     */
-    private boolean handleRecordEvent() {
-        if (0 == mRecordWaitUploadDataList.size()) {
-            return true;
-        }
-
-        ArrayList<MCRecordData> MCRecordDatas = new ArrayList<>();
-        synchronized (mRecordWaitUploadDataList) {
-            MCRecordDatas.addAll(mRecordWaitUploadDataList);
-        }
-
-        if (isRealTime) {
-            //实时处理事件
-            ArrayList<MCRecordData> needCommitList = new ArrayList<>();
-            ArrayList<MCRecordData> newCommitList = new ArrayList<>();
-            for (MCRecordData record : MCRecordDatas) {
-                LogUtil.defaultLog("handle the event of real action , queue size: " + MCRecordDatas.size() + ", data: " + record.getCode());
-                int state = Integer.parseInt(record.getState());
-                if (MCRecordData.STATE_NOT_COMMIT == state) {
-                    record.setState(MCRecordData.STATE_COMMITED + "");
-                    needCommitList.add(record);
-                    newCommitList.add(record);
-                } else if (MCRecordData.STATE_FAILED == state) {
-                    record.setState(MCRecordData.STATE_COMMITED + "");
-                    needCommitList.add(record);
-                } else if (MCRecordData.STATE_COMMITED == state) {
-                    LogUtil.defaultLog("this data already exist in db: " + record);
-                    needCommitList.add(record);
-                }
-            }
-
-            //只将新提交的数据插入到数据库中
-            if (0 != newCommitList.size()) {
-                LogUtil.defaultLog("save new data to db , queue size: " + newCommitList.size() + ", data: " + newCommitList);
-                RecordFactory.insertRecords(newCommitList);
-            }
-            LogUtil.defaultLog("isHandleRecordEventFinished: " + isHandleRecordEventFinished);
-            if (needCommitList != null && needCommitList.size() > 0) {
-                if (isHandleRecordEventFinished) {
-                    isHandleRecordEventFinished = false;
-                    LogUtil.defaultLog("send network request");
-                    //发送网络请求
-//                    uploadEvent(needCommitList);
-                    return false;
-                } else {
-                    LogUtil.defaultLog("the last result not return,waiting...");
-                }
-            } else {
-                LogUtil.defaultLog("network queue is null!");
-            }
-        } else {
-            LogUtil.defaultLog("save data to db, queue size: " + MCRecordDatas.size() + ", data: " + MCRecordDatas);
-            for (MCRecordData MCRecordData : MCRecordDatas) {
-                MCRecordData.setState(MCRecordData.STATE_COMMITED + "");
-            }
-            //存储至数据库中
-            RecordFactory.insertRecords(MCRecordDatas);
-        }
-
-        return true;
     }
 
     /**
@@ -988,31 +621,14 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
      */
     public void changePlayerBackground(boolean isPlaying, boolean isUndo) {
         if (!isPlaying) { //从暂停状态恢复比赛不选中球员
-
             if (mSelectedPlayer != null) { //球员灯亮的情况下改变比赛进程,生成当前球员控球事件,点球大战阶段除外
                 generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
-                LogUtil.defaultLog("change background generate ctrl event");
             }
             mSelectedPlayer = null;
         }
         if (mPlayerAdapter != null) {
             mPlayerAdapter.notifyDataSetChanged(isPlaying, isUndo);
         }
-    }
-
-    /**
-     * 用于退出统计时调用，上传未发送的数据
-     */
-    public boolean uploadData() {
-        isHandleRecordEventFinished = true;
-        mLastSelectedPlayerTime = System.currentTimeMillis();
-        return handleRecordEvent();
-    }
-
-    @Override
-    public void onDestroy() {
-        unRegisterBroadcast();
-        super.onDestroy();
     }
 
     private ArrayList<StatsActionItem> generateActions() {

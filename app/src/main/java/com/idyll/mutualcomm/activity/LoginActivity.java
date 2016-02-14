@@ -6,9 +6,13 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
+import com.idyll.mutualcomm.comm.SpCode;
 import com.sponia.foundationmoudle.BaseActivity;
 import com.sponia.foundationmoudle.common.PreventContinuousClick;
+import com.sponia.foundationmoudle.utils.SponiaSpUtil;
 import com.sponia.foundationmoudle.utils.SponiaToastUtil;
+
+import java.util.HashSet;
 
 /**
  * @author shibo
@@ -30,6 +34,7 @@ public class LoginActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         addMidView(R.layout.activity_loging);
         initView();
+        initData();
     }
 
     private void initView() {
@@ -39,6 +44,10 @@ public class LoginActivity extends BaseActivity {
         tvEdit = (TextView) findViewById(R.id.tv_edit);
         tvStats.setOnClickListener(new PreventContinuousClick(this));
         tvEdit.setOnClickListener(new PreventContinuousClick(this));
+    }
+
+    private void initData() {
+        SponiaSpUtil.setDefaultSpValue(SpCode.SOCKET_ID, new HashSet<>());
     }
 
     @Override
@@ -70,7 +79,7 @@ public class LoginActivity extends BaseActivity {
             SponiaToastUtil.showShortToast(getString(R.string.exit_prompt));
             exitTime = System.currentTimeMillis();
         } else {
-            finish();
+//            finish();
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(0);
         }

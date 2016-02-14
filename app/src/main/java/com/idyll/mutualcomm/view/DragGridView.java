@@ -302,36 +302,11 @@ public class DragGridView extends GridView {
         this.mVerticalSpacing = verticalSpacing;
     }
 
-    /**
-     * 若列数设置为AUTO_FIT，我们在这里面计算具体的列数
-     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mNumColumns == AUTO_FIT) {
-            int numFittedColumns;
-            if (mColumnWidth > 0) {
-                int gridWidth = Math.max(MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft()
-                        - getPaddingRight(), 0);
-                numFittedColumns = gridWidth / mColumnWidth;
-                if (numFittedColumns > 0) {
-                    while (numFittedColumns != 1) {
-                        if (numFittedColumns * mColumnWidth + (numFittedColumns - 1)
-                                * mHorizontalSpacing > gridWidth) {
-                            numFittedColumns--;
-                        } else {
-                            break;
-                        }
-                    }
-                } else {
-                    numFittedColumns = 1;
-                }
-            } else {
-                numFittedColumns = 2;
-            }
-            mNumColumns = numFittedColumns;
-        }
-
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2,
+                MeasureSpec.EXACTLY);
+        super.onMeasure(widthMeasureSpec, expandSpec);
     }
 
     /**

@@ -6,4 +6,5 @@
     <dimen name="tab_height">48dp</dimen>
     <dimen name="edit_text_padding">0dp</dimen>
     <dimen name="player_reduce_height">48dp</dimen>
+    <dimen name="player_number_size">30sp</dimen>
 </resources>

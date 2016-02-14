@@ -38,7 +38,7 @@ public class MCPlayerTextItem implements Parcelable, Comparable<MCPlayerTextItem
     }
 
     protected MCPlayerTextItem(Parcel in) {
-        this.player = in.readParcelable(MCPlayer.class.getClassLoader());
+        this.player = in.readParcelable(Player.class.getClassLoader());
         this.textColor = in.readInt();
         this.selected = in.readByte() != 0;
     }

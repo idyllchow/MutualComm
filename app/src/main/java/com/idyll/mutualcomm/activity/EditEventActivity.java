@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -77,8 +76,6 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
     private int port;
     private String matchId;
     private String teamId;
-
-    private StringBuffer mConsoleStr = new StringBuffer();
     private Socket mSocket;
     private boolean isStartRecieveMsg;
     protected BufferedReader mReader;
@@ -87,6 +84,10 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
     private String eventCode;
     private String matchTime;
     private String clientStartAt;
+    private String id;
+    private String lastedID = "";
+    private SocketHandler mHandler;
+
     //导出和登pw
     private PopupWindow mSettingPopupWindow;
 
@@ -129,6 +130,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
         eventAdapter = new MCEventAdapter(this, dbList);
         listView.setAdapter(eventAdapter);
         listView.setOnItemClickListener(this);
+        mHandler = new SocketHandler();
     }
 
     private void initData() {
@@ -138,8 +140,9 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
             matchId = "matchIdSponia";
             teamId = "teamIdSponia";
         }
-
-        if (!isStartRecieveMsg) {
+        if (!isStartRecieveMsg && !MCConstants.isAdd) {
+            LogUtil.defaultLog("-----initSocket------");
+            MCConstants.isAdd = true;
             initSocket();
         }
 
@@ -148,7 +151,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
         eventAdapter.notifyDataSetChanged();
     }
 
-    Handler mHandler = new Handler() {
+    class SocketHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -156,18 +159,22 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
                 case MSG_RECEIVE_MSG:
                     try {
                         JSONObject json = new JSONObject((String) msg.obj);
-                        mConsoleStr.append(json.getString("from") + ":" + json.getString("msg") + "   " + "\n");
-//                        mConsoleTxt.setText(mConsoleStr);
-//                        SponiaToastUtil.showShortToast(mConsoleStr.toString());
                         playerNum = json.getString("playerNum");
                         eventCode = json.getString("eventCode");
                         matchTime = json.getString("matchTime");
                         clientStartAt = json.getString("clientStartAt");
+                        id = json.getString("id");
+//                       if (!lastedID.equals(id)) {
+//                        LogUtil.defaultLog("json from---->" + json.getString("from") );
 //                        eventList.add(new MCRecordData(i + "", EventCode.sEventNameMap.get(Integer.parseInt(eventCode)), matchId, teamId, playerNum, eventCode, "", "", "", "", clientStartAt, "", matchTime, ""));
+                        LogUtil.defaultLog("handler MSG_RECEIVE_MSG playerNum: " + playerNum + "; eventCode " + eventCode + "; matchTime " + matchTime + "; id " + id);
                         RecordFactory.insertRecord((new MCRecordData(UUID.randomUUID() + "", EventCode.sEventNameMap.get(Integer.parseInt(eventCode)), matchId, teamId, playerNum, eventCode, "", "", "", "", clientStartAt, "", matchTime, "")));
                         dbList.clear();
                         dbList.addAll(RecordFactory.queryRecords(matchId, teamId));
+                        LogUtil.defaultLog("handler dbList size " + dbList.size());
                         eventAdapter.notifyDataSetChanged();
+//                       }
+                        lastedID = json.getString("id");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -177,7 +184,10 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
             }
 
         }
-    };
+
+    }
+
+    ;
 
     private int selectedIndex = -1;
 
@@ -475,6 +485,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
             sweetAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
+                    isStartRecieveMsg = false;
                     EditEventActivity.this.finish();
                 }
             });
@@ -496,6 +507,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
                     while (isStartRecieveMsg) {
                         if (mReader.ready()) {
                             mHandler.obtainMessage(MSG_RECEIVE_MSG, mReader.readLine()).sendToTarget();
+                            LogUtil.defaultLog("initSocket");
                         }
                         Thread.sleep(200);
                     }
@@ -508,33 +520,6 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
             }
         });
         thread.start();
-    }
-
-    private void send() {
-        new AsyncTask<String, Integer, String>() {
-
-            @Override
-            protected String doInBackground(String... params) {
-                sendMsg();
-                return null;
-            }
-        }.execute();
-    }
-
-    protected void sendMsg() {
-        try {
-            String socketID = "";
-            String msg = "";
-            JSONObject json = new JSONObject();
-            json.put("to", socketID);
-            json.put("msg", msg);
-            mWriter.write(json.toString() + "\n");
-            mWriter.flush();
-            mConsoleStr.append("我:" + msg + "   " + "\n");
-            SponiaToastUtil.showShortToast(mConsoleStr.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -567,7 +552,5 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        isStartRecieveMsg = false;
     }
 }

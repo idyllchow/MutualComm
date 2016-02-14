@@ -18,16 +18,19 @@ public abstract class DragGridBaseAdapter extends BaseAdapter implements IDrag {
     protected final ArrayList<StatsMatchFormationBean> list;
     protected LayoutInflater mInflater;
     protected int mHidePosition = -1;
-
     protected int mItemWidth;
     protected int mItemHeight;
-
     protected int whiteColor;
     protected int redColor;
     protected int grayColor;
+    protected int blackColor;
     protected int oldPosition = -1;
     protected int newPosition = -1;
     protected boolean isClick;
+    protected boolean isLeft;
+    protected boolean isPlaying;
+    protected boolean isUndo;
+
 
     public DragGridBaseAdapter(Context context, ArrayList<StatsMatchFormationBean> list) {
         this.list = list;
@@ -35,6 +38,13 @@ public abstract class DragGridBaseAdapter extends BaseAdapter implements IDrag {
         whiteColor = Color.WHITE;
         redColor = context.getResources().getColor(R.color.R);
         grayColor = context.getResources().getColor(R.color.gray_text);
+        blackColor = context.getResources().getColor(R.color.G);
+
+    }
+
+    public DragGridBaseAdapter(Context context, ArrayList<StatsMatchFormationBean> list, boolean isLeft) {
+        this(context, list);
+        this.isLeft = isLeft;
     }
 
     public void setItemWidthAndHeight(int width, int height) {
@@ -98,6 +108,18 @@ public abstract class DragGridBaseAdapter extends BaseAdapter implements IDrag {
         this.oldPosition = oldPosition;
         this.newPosition = newPosition;
         this.isClick = isClick;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 通知适配器更改
+     *
+     * @param isPlaying 比赛是否进行
+     * @param isUndo    是否为撤销动作
+     */
+    public void notifyDataSetChanged(boolean isPlaying, boolean isUndo) {
+        this.isPlaying = isPlaying;
+        this.isUndo = isUndo;
         notifyDataSetChanged();
     }
 }

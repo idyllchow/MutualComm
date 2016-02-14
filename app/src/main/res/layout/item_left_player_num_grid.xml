@@ -10,11 +10,10 @@
         android:id="@+id/number_tv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="15dp"
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@color/R"
-        android:textSize="35sp"
+        android:textSize="@dimen/player_number_size"
         app:fontStyle="lexia_bold" />
 
 </com.idyll.mutualcomm.view.RatioFrameLayout>

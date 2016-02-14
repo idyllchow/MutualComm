@@ -14,24 +14,24 @@
         android:gravity="center">
 
         <!--android:background="@drawable/bg_item_event"-->
-    <!--android:background="@drawable/bg_gray_round_rectangle"-->
+        <!--android:background="@drawable/bg_gray_round_rectangle"-->
 
-    <ImageView
-        android:id="@+id/action_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        tools:ignore="contentDescription" />
+        <ImageView
+            android:id="@+id/action_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            tools:ignore="contentDescription" />
 
-    <TextView
-        android:id="@+id/action_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textColor="@color/op_theme_red"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/action_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/op_theme_red"
+            android:textSize="16sp" />
     </FrameLayout>
 </com.idyll.mutualcomm.view.RatioFrameLayout>
