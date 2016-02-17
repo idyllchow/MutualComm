@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.entity.EditActionItem;
-import com.sponia.foundationmoudle.utils.LogUtil;
 
 import java.util.ArrayList;
 
@@ -104,7 +103,6 @@ public class MCActionDetailAdapter extends BaseAdapter {
         } else {
             holder.itemLayout.setBackgroundResource(R.drawable.bg_gray_rectangle);
         }
-        LogUtil.defaultLog("----selected position------>" + selectedItem);
 
         return convertView;
     }

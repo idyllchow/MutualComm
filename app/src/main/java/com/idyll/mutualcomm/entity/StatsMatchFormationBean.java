@@ -14,19 +14,6 @@ import com.sponia.foundationmoudle.bean.SponiaBaseBean;
 public class StatsMatchFormationBean extends SponiaBaseBean implements Comparable<StatsMatchFormationBean> {
 
 
-    /**
-     * name : 李浩锋
-     * gender : 1
-     * created_at : 2015-05-07 15:40:00
-     * updated_at : 2015-09-08 08:58:47
-     * team_id : 5538b7a3af146b532be033f9
-     * playerNum : 9
-     * relation_id : 55e3a4629e319a5d6b802f9a
-     * nationality : 中国
-     * id : 554b8750af146b2288c9f3cd
-     * description :
-     */
-
     public String name;
     public int gender;
     public String created_at;
@@ -37,16 +24,26 @@ public class StatsMatchFormationBean extends SponiaBaseBean implements Comparabl
     public String nationality;
     public String id;
     public String description;
-
-    public int position;
+    //在列表中位置
+    public int index;
+    //是否在场上
     public boolean onField;
-
-    public StatsMatchFormationBean() {
-    }
+    public int textColor;
+    //是否被选中
+    public boolean selected = false;
+    //场上位置
+    public String position;
 
     public StatsMatchFormationBean(String id, String Player_Num) {
         this.id = id;
         this.Player_Num = Player_Num;
+    }
+
+    public StatsMatchFormationBean(String id, String Player_Num, int textColor, boolean selected) {
+        this.id = id;
+        this.Player_Num = Player_Num;
+        this.textColor = textColor;
+        this.selected = selected;
     }
 
     @Override
@@ -56,7 +53,6 @@ public class StatsMatchFormationBean extends SponiaBaseBean implements Comparabl
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
         dest.writeString(this.name);
         dest.writeInt(this.gender);
         dest.writeString(this.created_at);
@@ -67,12 +63,14 @@ public class StatsMatchFormationBean extends SponiaBaseBean implements Comparabl
         dest.writeString(this.nationality);
         dest.writeString(this.id);
         dest.writeString(this.description);
-        dest.writeInt(this.position);
+        dest.writeInt(this.index);
         dest.writeByte(onField ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.textColor);
+        dest.writeByte(selected ? (byte) 1 : (byte) 0);
+        dest.writeString(this.position);
     }
 
     protected StatsMatchFormationBean(Parcel in) {
-        super(in);
         this.name = in.readString();
         this.gender = in.readInt();
         this.created_at = in.readString();
@@ -83,8 +81,11 @@ public class StatsMatchFormationBean extends SponiaBaseBean implements Comparabl
         this.nationality = in.readString();
         this.id = in.readString();
         this.description = in.readString();
-        this.position = in.readInt();
+        this.index = in.readInt();
         this.onField = in.readByte() != 0;
+        this.textColor = in.readInt();
+        this.selected = in.readByte() != 0;
+        this.position = in.readString();
     }
 
     public static final Parcelable.Creator<StatsMatchFormationBean> CREATOR = new Parcelable.Creator<StatsMatchFormationBean>() {

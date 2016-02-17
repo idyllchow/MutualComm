@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.entity.MCPlayerTextItem;
+import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class MCPlayerAdapter extends BaseAdapter {
 
     //上下文
     private Context mContext;
-    private ArrayList<MCPlayerTextItem> players;
+    private ArrayList<StatsMatchFormationBean> players;
     private final LayoutInflater mInflater;
 
     private int mItemWidth;
@@ -33,7 +33,7 @@ public class MCPlayerAdapter extends BaseAdapter {
     private boolean isUndo;
 
 
-    public MCPlayerAdapter(Context context, ArrayList<MCPlayerTextItem> players) {
+    public MCPlayerAdapter(Context context, ArrayList<StatsMatchFormationBean> players) {
         this.players = players;
         this.mContext = context;
         mInflater = LayoutInflater.from(mContext);
@@ -71,13 +71,12 @@ public class MCPlayerAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        MCPlayerTextItem item = players.get(position);
+        StatsMatchFormationBean item = players.get(position);
         if (players != null) { //背号有可能为0
-            holder.tv.setText(item.player.Player_Num);
+            holder.tv.setText(item.Player_Num);
             holder.tv.setTextColor(mContext.getResources().getColor(R.color.black));
             holder.tv.setSelected(item.selected);
             holder.tv.setBackgroundResource(R.drawable.bg_black_ring_selector);
-//            convertView.setVisibility(position == mHidePosition ? View.INVISIBLE : View.VISIBLE);
         } else {
             holder.tv.setText("");
             holder.tv.setBackgroundResource(0);
@@ -107,8 +106,8 @@ public class MCPlayerAdapter extends BaseAdapter {
      *
      * @return
      */
-    public ArrayList<MCPlayerTextItem> getSlectedPlayer() {
-        ArrayList<MCPlayerTextItem> selectedPlayers = new ArrayList<>();
+    public ArrayList<StatsMatchFormationBean> getSlectedPlayer() {
+        ArrayList<StatsMatchFormationBean> selectedPlayers = new ArrayList<>();
         return selectedPlayers;
     }
 }

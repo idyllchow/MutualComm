@@ -22,7 +22,6 @@ import com.idyll.mutualcomm.activity.StatsOperateActivity;
 import com.idyll.mutualcomm.adapter.StatsActionAdapter;
 import com.idyll.mutualcomm.adapter.StatsPlayerAdapter;
 import com.idyll.mutualcomm.comm.MCConstants;
-import com.idyll.mutualcomm.entity.MCPlayerTextItem;
 import com.idyll.mutualcomm.entity.StatsActionItem;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.event.EventCode;
@@ -49,7 +48,8 @@ import java.util.UUID;
  */
 public class StatsMatchFragment extends StatsBaseFragment implements AdapterView.OnItemClickListener, View.OnTouchListener {
     //队员
-    private ArrayList<MCPlayerTextItem> mItems = new ArrayList<>();
+//    private ArrayList<MCPlayerTextItem> mItems = new ArrayList<>();
+    private ArrayList<StatsMatchFormationBean> mItems = new ArrayList<>();
     //场上球员
     private ArrayList<StatsMatchFormationBean> mOnFieldPlayers;
     //等待上传的操作
@@ -118,7 +118,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
      * @param playerList 球员list
      * @return
      */
-    public static StatsMatchFragment getInstance(int statsMode, int matchType, String matchId, long timeDiff, ArrayList<StatsMatchFormationBean> playerList) {
+    public static StatsMatchFragment getInstance(int statsMode, int matchType, String matchId, String teamId, long timeDiff, ArrayList<StatsMatchFormationBean> playerList) {
         StatsMatchFragment fragment = new StatsMatchFragment();
         Bundle args = new Bundle();
         args.putInt("statsMode", statsMode);
@@ -126,6 +126,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         args.putInt("matchType", 20);
         args.putParcelableArrayList("playerList", playerList);
         args.putString("matchId", matchId);
+        args.putString("teamId", teamId);
         args.putLong("timeDiff", timeDiff);
         fragment.setArguments(args);
         return fragment;
@@ -138,6 +139,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             statsMode = savedInstanceState.getInt("statsMode");
             matchType = savedInstanceState.getInt("matchType");
             matchId = savedInstanceState.getString("matchId");
+            teamId = savedInstanceState.getString("teamId");
             timeDiff = savedInstanceState.getLong("timeDiff");
             mSelectedPlayer = savedInstanceState.getParcelable("selectedPlayer");
             mSelectedPosition = savedInstanceState.getInt("selectedPosition", -1);
@@ -157,19 +159,19 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             }
             mOnFieldPlayers = savedInstanceState.getParcelableArrayList("playerList");
             if (null != mOnFieldPlayers && !mOnFieldPlayers.isEmpty()) {
-                mItems.addAll(generateDatas(mOnFieldPlayers));
+                mItems.addAll(generateData(mOnFieldPlayers));
             }
         } else if (null != getArguments()) {
             statsMode = getArguments().getInt("statsMode");
             matchType = getArguments().getInt("matchType");
-            matchId = getArguments().getString("match");
+            matchId = getArguments().getString("matchId");
+            teamId = getArguments().getString("teamId");
             timeDiff = getArguments().getLong("timeDiff");
             mOnFieldPlayers = getArguments().getParcelableArrayList("playerList");
             if (null != mOnFieldPlayers && !mOnFieldPlayers.isEmpty()) {
-                mItems.addAll(generateDatas(mOnFieldPlayers));
+                mItems.addAll(generateData(mOnFieldPlayers));
             }
         }
-        teamId = "sponia";
     }
 
     @Override
@@ -179,6 +181,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         outState.putInt("statsMode", statsMode);
         outState.putInt("matchType", matchType);
         outState.putString("matchId", matchId);
+        outState.putString("teamId", teamId);
         outState.putLong("timeDiff", timeDiff);
         outState.putParcelable("selectedPlayer", mSelectedPlayer);
         outState.putInt("selectedPosition", mSelectedPosition);
@@ -194,16 +197,16 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
      * @param players
      * @return
      */
-    private List<MCPlayerTextItem> generateDatas(ArrayList<StatsMatchFormationBean> players) {
-        MCPlayerTextItem[] items = new MCPlayerTextItem[matchType];
+    private List<StatsMatchFormationBean> generateData(ArrayList<StatsMatchFormationBean> players) {
+        StatsMatchFormationBean[] items = new StatsMatchFormationBean[matchType];
         if (null != players && !players.isEmpty()) {
             int redColor = getResources().getColor(R.color.R);
             String selectNumber = null == mSelectedPlayer ? "" : mSelectedPlayer.Player_Num + "";
             for (StatsMatchFormationBean player : players) {
-                int pos = player.position;
+                int pos = player.index;
                 int color = (0 == (pos / 3 + pos % 3) % 2) ? Color.WHITE : redColor;
                 if (pos < matchType) {
-                    items[pos] = new MCPlayerTextItem(player, color, selectNumber.equals(player.Player_Num));
+                    items[pos] = new StatsMatchFormationBean(player.id, player.Player_Num, color, selectNumber.equals(player.Player_Num));
                 }
             }
         }
@@ -235,7 +238,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
 
         mOnFieldPlayers = players;
         mItems.clear();
-        mItems.addAll(generateDatas(players));
+        mItems.addAll(generateData(players));
         changePlayerBackground(((StatsOperateActivity) getActivity()).getMatchIsPlaying(), false);
     }
 
@@ -266,7 +269,8 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
 
         int size = mItems.size();
         for (int i = size; i < MCConstants.TOTAL_PLAYERS; i++) {
-            mItems.add(new MCPlayerTextItem(new StatsMatchFormationBean("", MCConstants.FILL_LAYOUT)));
+//            mItems.add(new MCPlayerTextItem(new StatsMatchFormationBean("", MCConstants.FILL_LAYOUT)));
+            mItems.add(new StatsMatchFormationBean("", MCConstants.FILL_LAYOUT));
         }
         mPlayerAdapter = new StatsPlayerAdapter(getActivity(), mItems);
         mActionAdapter = new StatsActionAdapter(getActivity(), generateActions(), matchType);
@@ -290,44 +294,77 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         mNumberMusic = sp.load(getActivity(), R.raw.op_number, 1);
     }
 
+    private int eventPosition = -1;
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ((StatsOperateActivity) getActivity()).hideTipView();
+        LogUtil.defaultLog("onItemClick");
         if (!((StatsOperateActivity) getActivity()).getMatchIsPlaying()) {
             return;
         }
         if (R.id.gridView_left == parent.getId()) {
-            MCPlayerTextItem selectItem = (MCPlayerTextItem) mPlayerAdapter.getItem(position);
-            if (selectItem == null || TextUtils.isEmpty(selectItem.player.id)) {
+            StatsMatchFormationBean selectItem = (StatsMatchFormationBean) mPlayerAdapter.getItem(position);
+            eventPosition = position;
+            if (selectItem == null || TextUtils.isEmpty(selectItem.id)) {
                 return;
             }
+
+            if (stopPosition >= -1) {
+                position = stopPosition;
+            }
+
             if (mSelectedPosition != position) {
                 if (-1 != mSelectedPosition) {
-                    MCPlayerTextItem lastSelectedItem = (MCPlayerTextItem) mPlayerAdapter.getItem(mSelectedPosition);
+                    StatsMatchFormationBean lastSelectedItem = (StatsMatchFormationBean) mPlayerAdapter.getItem(mSelectedPosition);
                     if (lastSelectedItem != null) {
                         lastSelectedItem.selected = false;
                         //换点球员后的控球事件
-                        mLastSelectedPlayerTime = generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
+                        mLastSelectedPlayerTime = generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
                     }
                 } else {
                     mLastSelectedPlayerTime = System.currentTimeMillis();
                 }
+                LogUtil.defaultLog("; stopPosition " + stopPosition + "; mSelectedPosition " + mSelectedPosition + "; position " + position + "; selected item " + selectItem + "; number " + selectItem.Player_Num + "; stopNum " + mPlayerGridView.getStopNum());
                 selectItem.selected = true;
                 mSelectedPosition = position;
-                mSelectedPlayer = selectItem.player;
+                mSelectedPlayer = selectItem;
+
+                //连线传球
+                if (stopPosition >= 0) {
+                    if (MCConstants.LINE_PASS) {
+
+
+                        StatsMatchFormationBean stopSelectedItem = (StatsMatchFormationBean) mPlayerAdapter.getItem(stopPosition);
+                        selectItem.selected = false;
+                        stopSelectedItem.selected = true;
+                        //连线传球事件
+                        generateEvent(EventCode.SuccessfulPass, MCConstants.EventType.EVENT_ACTION, mSelectedPlayer.Player_Num, stopSelectedItem.Player_Num, eventPosition, 0);
+                        MCConstants.LINE_PASS = false;
+
+                        mSelectedPlayer = stopSelectedItem;
+                    }
+                }
+
             } else { //控球事件
-                generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
+                generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
                 //取消选中的球员
                 selectItem.selected = false;
                 mSelectedPlayer = null;
                 mSelectedPosition = -1;
             }
+
+            if (mSelectedPlayer == null) {
+                stopPosition = -1;
+            }
+
             changePlayerBackground(((StatsOperateActivity) getActivity()).getMatchIsPlaying(), false);
             sp.play(mNumberMusic, 1, 1, 0, 0, 1);
         }
     }
 
     private int lastTouchPosition = -1;
+    private int stopPosition = -1;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -338,6 +375,8 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             } else {
                 if (event.getAction() == MotionEvent.ACTION_MOVE) {
                     return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    stopPosition = mPlayerGridView.pointToPosition((int) event.getX(), (int) event.getY());
                 }
             }
         } else if (v.getId() == R.id.gridView_right) {
@@ -390,7 +429,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         } else if (menuClass == 1) {
             if (item.menuClass == 0) {
                 if (item.immediatelyDismiss) {
-                    generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", 0);
+                    generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
                     resetState();
                 } else if (item.isSelected) {
                     resetState();
@@ -399,7 +438,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
                 }
             } else if (item.menuClass == 1) {
                 if (item.nextActions == null || item.nextActions.size() == 0) {
-                    generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", 0);
+                    generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
                     if (item.immediatelyDismiss) {
                         resetState();
                     }
@@ -410,7 +449,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
                 }
             }
         } else if (menuClass == 0 && item.nextActions == null) {//一级事件,没有二级事件,点击就直接产生事件
-            generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", 0);
+            generateEvent(item.code, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
         }
     }
 
@@ -467,13 +506,15 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     /**
      * 生成比赛事件,包含比赛阶段和实时事件
      *
-     * @param code      事件代码
-     * @param eventType 事件类型 1-上场事件 2-下场事件 3-进程事件 4-动作事件
-     * @param playedId  只有球员上下场时需要传,其他需要ID的事件可在本类中获取
-     * @param eventTime 事件时间
+     * @param code         事件代码
+     * @param eventType    事件类型 1-上场事件 2-下场事件 3-进程事件 4-动作事件
+     * @param playedId     只有球员上下场时需要传,其他需要ID的事件可在本类中获取
+     * @param eventTime    事件时间
+     * @param position     事件发生时球员位置
+     * @param targetPlayer 目标球员
      * @return
      */
-    public long generateEvent(int code, int eventType, String playedId, long eventTime) {
+    public long generateEvent(int code, int eventType, String playedId, String targetPlayer, int position, long eventTime) {
         int matchProgress = ((StatsOperateActivity) getActivity()).getMatchProcess();
         //不是一个完整的事件
         if (eventType == MCConstants.EventType.EVENT_ACTION) {
@@ -495,6 +536,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             }
         }
 
+
         if (code != EventCode.Ctrl && code != EventCode.EnterThePitch && code != EventCode.LeaveThePitch) {
             sp.play(mActionMusic, 1, 1, 0, 0, 1);
             mVibrator.vibrate(50);
@@ -511,9 +553,30 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
                 code = EventCode.penaltyGoal;
             }
         }
-
+        //事件描述
+        String eventDetail;
+        //场上位置
+        String fieldPosition = "";
+        LogUtil.defaultLog("position == " + position);
         long currentTime = System.currentTimeMillis();
-        String clientEventId = UUID.randomUUID() + "";
+        if (!TextUtils.isEmpty(targetPlayer)) {
+            eventDetail = playedId + "号传给" + targetPlayer + "号";
+        } else {
+            eventDetail = EventHelper.getEventDes(code, playedId);
+        }
+        //事件球员位置
+        if (position >= 0) {
+            if (position < 5) {
+                fieldPosition = "F";
+            } else if (position < 10) {
+                fieldPosition = "M";
+            } else if (position < 15) {
+                fieldPosition = "D";
+            } else if (position < 20) {
+                fieldPosition = "GK";
+            }
+        }
+
         if (mLastSelectedPlayerTime == 0l) {
             mLastSelectedPlayerTime = currentTime;
         }
@@ -526,7 +589,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
 
         float matchTime = BigDecimalUtil.
                 div(((StatsOperateActivity) getActivity()).getMatchTime(), 60000, 2);
-        LogUtil.defaultLog("mSelectedPosition " + mSelectedPosition + "; mSelectedPlayer: " + mSelectedPlayer + "; playedId: " + playedId + "; eventType: " + eventType + "; code: " + code + "; clientStartedAt: " + clientStartedAt + "; matchTime: " + matchTime);
+        LogUtil.defaultLog("teamId " + teamId + "; matchId" + matchId + "; mSelectedPosition " + mSelectedPosition + "; mSelectedPlayer: " + mSelectedPlayer + "; playedId: " + playedId + "; eventType: " + eventType + "; code: " + code + "; clientStartedAt: " + clientStartedAt + "; matchTime: " + matchTime);
         if (eventType == MCConstants.EventType.EVENT_PROCESS) { //比赛进程事件,事件开始结束时间一样
             playedId = null;
             clientEndedAt = clientStartedAt;
@@ -540,7 +603,10 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             ((StatsOperateActivity) getActivity()).send(mSelectedPlayer.Player_Num + "号 射门 " + matchTime, mSelectedPlayer.Player_Num, code + "", ((StatsOperateActivity) getActivity()).getShowMatchTime(), clientStartedAt);
         }
 
-        MCRecordData MCRecordData = new MCRecordData(clientEventId, clientEventId, matchId, teamId, playedId, code + "", "", "", "", clientEventId, clientStartedAt, clientEndedAt, matchTime + "", "0");
+        MCRecordData MCRecordData = new MCRecordData(UUID.randomUUID().toString(), eventDetail, matchId, teamId, playedId, code + "", fieldPosition, "", "", "", eventDetail, clientStartedAt, clientEndedAt, matchTime + "", "0");
+        //demo
+        RecordFactory.insertRecord(MCRecordData);
+
         if (MCRecordData != null) {
             mRecordWaitUploadDataList.add(MCRecordData);
         }
@@ -549,6 +615,14 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         }
 
         ((StatsOperateActivity) getActivity()).updateEventDes(EventHelper.getEventDes(code, playedId), false);
+        //部分行为自动灭
+        if (code == EventCode.ShotOffTarget || code == EventCode.UnsuccessfulPass || code == EventCode.Goal || code == EventCode.GoalAssist || code == EventCode.OwnGoal || code == EventCode.YellowCard || code == EventCode.RedCard) {
+            generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", "", eventPosition, 0);
+            StatsMatchFormationBean stopSelectedItem = (StatsMatchFormationBean) mPlayerAdapter.getItem(stopPosition);
+            stopSelectedItem.selected = false;
+            mSelectedPlayer = null;
+            mPlayerAdapter.notifyDataSetChanged();
+        }
 
         return currentTime;
     }
@@ -622,7 +696,7 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
     public void changePlayerBackground(boolean isPlaying, boolean isUndo) {
         if (!isPlaying) { //从暂停状态恢复比赛不选中球员
             if (mSelectedPlayer != null) { //球员灯亮的情况下改变比赛进程,生成当前球员控球事件,点球大战阶段除外
-                generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", 0);
+                generateEvent(EventCode.Ctrl, MCConstants.EventType.EVENT_ACTION, "", "", mSelectedPosition, 0);
             }
             mSelectedPlayer = null;
         }

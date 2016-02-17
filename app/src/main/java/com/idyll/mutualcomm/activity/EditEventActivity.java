@@ -168,7 +168,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
 //                        LogUtil.defaultLog("json from---->" + json.getString("from") );
 //                        eventList.add(new MCRecordData(i + "", EventCode.sEventNameMap.get(Integer.parseInt(eventCode)), matchId, teamId, playerNum, eventCode, "", "", "", "", clientStartAt, "", matchTime, ""));
                         LogUtil.defaultLog("handler MSG_RECEIVE_MSG playerNum: " + playerNum + "; eventCode " + eventCode + "; matchTime " + matchTime + "; id " + id);
-                        RecordFactory.insertRecord((new MCRecordData(UUID.randomUUID() + "", EventCode.sEventNameMap.get(Integer.parseInt(eventCode)), matchId, teamId, playerNum, eventCode, "", "", "", "", clientStartAt, "", matchTime, "")));
+                        RecordFactory.insertRecord((new MCRecordData(UUID.randomUUID() + "", EventCode.sEventNameMap.get(Integer.parseInt(eventCode)), matchId, teamId, playerNum, eventCode, "",  "", "", "", "", clientStartAt, "", matchTime, "")));
                         dbList.clear();
                         dbList.addAll(RecordFactory.queryRecords(matchId, teamId));
                         LogUtil.defaultLog("handler dbList size " + dbList.size());
@@ -266,7 +266,6 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
                 actionAdapter.setSelectedItem(position);
 
                 EditActionItem actionItem = (EditActionItem) actionAdapter.getItem(position);
-                LogUtil.defaultLog("actionItem == " + actionItem + "; position == " + position);
                 if (actionItem != null) {
                     MCRecordData recordData = RecordFactory.queryRecords(matchId, teamId).get(selectedIndex);
                     recordData.setEvent_location(actionItem.action);
@@ -466,7 +465,7 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
     };
 
     /**
-     * 导出数据监听
+     * 清空数据监听
      */
     private SweetAlertDialog.OnSweetClickListener clearDataListener = new SweetAlertDialog.OnSweetClickListener() {
         @Override

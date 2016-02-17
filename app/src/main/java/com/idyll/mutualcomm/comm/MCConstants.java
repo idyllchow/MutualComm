@@ -125,4 +125,9 @@ public class MCConstants {
      * 总球员数
      */
     public static final int TOTAL_PLAYERS = 20;
+
+    /**
+     * 连线传球成功
+     */
+    public static boolean LINE_PASS = false;
 }

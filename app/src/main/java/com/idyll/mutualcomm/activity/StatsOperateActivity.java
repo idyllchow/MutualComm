@@ -341,22 +341,21 @@ public class StatsOperateActivity extends BaseActivity {
             for (StatsMatchFormationBean player : playerList) {
                 if (onFieldMap.containsKey(player.id + "")) {
                     player.onField = true;
-                    player.position = onFieldMap.get(player.id + "");
+                    player.index = onFieldMap.get(player.id + "");
                     onFieldsList.add(player);
                     allList.add(player);
                 } else if (offFieldMap.containsKey(player.id + "")) {
                     player.onField = false;
-                    player.position = offFieldMap.get(player.id + "");
+                    player.index = offFieldMap.get(player.id + "");
                     int index = -1;
                     for (int i = 0; i < positionIndex.size(); i++) {
-                        if (positionIndex.get(i) == (player.position)) {
+                        if (positionIndex.get(i) == (player.index)) {
                             index = i;
                             continue;
                         }
                     }
                     if (index != -1) {
                         positionIndex.remove(index);
-                        LogUtil.defaultLog("playerList player not contain position " + player.position);
                     }
                     allList.add(player);
                 } else { //后台改球员情况
@@ -367,13 +366,13 @@ public class StatsOperateActivity extends BaseActivity {
             int sizeTemp = tempAddPlayer.size();
             for (int i = 0; i < sizeTemp; i++) {
                 tempAddPlayer.get(i).onField = false;
-                tempAddPlayer.get(i).position = positionIndex.get(i);
+                tempAddPlayer.get(i).index = positionIndex.get(i);
                 allList.add(tempAddPlayer.get(i));
             }
         } else {
             int position = 0;
             for (StatsMatchFormationBean player : playerList) {
-                player.position = position;
+                player.index = position;
                 position++;
             }
             allList.clear();
@@ -447,7 +446,7 @@ public class StatsOperateActivity extends BaseActivity {
      */
     private void addMatchFragment() {
         if (mMatchFragment == null) {
-            mMatchFragment = StatsMatchFragment.getInstance(statsMode, matchType, matchId, timeDiff, onFieldsList);
+            mMatchFragment = StatsMatchFragment.getInstance(statsMode, matchType, matchId, teamId, timeDiff, onFieldsList);
             fragmentTransaction.add(R.id.content_layout, mMatchFragment, MATCH_FRAGMENT);
         }
     }
@@ -668,7 +667,7 @@ public class StatsOperateActivity extends BaseActivity {
         if (null != players && 0 != players.size()) {
             HashMap<String, Integer> map = new HashMap<>();
             for (StatsMatchFormationBean player : players) {
-                map.put(player.id + "", player.position);
+                map.put(player.id + "", player.index);
             }
             SponiaSpUtil.setDefaultSpValue(key, JSON.toJSONString(map, true));
         } else {
@@ -713,7 +712,7 @@ public class StatsOperateActivity extends BaseActivity {
             long eventTime = System.currentTimeMillis();
             if (lastOnField.size() <= 0) { //比赛开始出场阵容
                 for (StatsMatchFormationBean matchFormationBean : onFieldList) {
-                    mMatchFragment.generateEvent(EventCode.EnterThePitch, MCConstants.EventType.EVENT_ENTERTHEPITCH, matchFormationBean.id, eventTime);
+                    mMatchFragment.generateEvent(EventCode.EnterThePitch, MCConstants.EventType.EVENT_ENTERTHEPITCH, matchFormationBean.id, "", -1, eventTime);
                 }
                 lastOnField.addAll(onFieldList);
             } else { //比赛过程中换人事件,需对比球场上球员,确定变动
@@ -731,12 +730,12 @@ public class StatsOperateActivity extends BaseActivity {
                 if (diffNum.size() > 0) {
                     for (StatsMatchFormationBean formationBean : lastOnField) {
                         if (diffNum.contains(formationBean.Player_Num)) {
-                            mMatchFragment.generateEvent(EventCode.LeaveThePitch, MCConstants.EventType.EVENT_LEAVETHEPITCH, formationBean.id, eventTime);
+                            mMatchFragment.generateEvent(EventCode.LeaveThePitch, MCConstants.EventType.EVENT_LEAVETHEPITCH, formationBean.id, "", -1, eventTime);
                         }
                     }
                     for (StatsMatchFormationBean formationBean : onFieldList) {
                         if (diffNum.contains(formationBean.Player_Num)) {
-                            mMatchFragment.generateEvent(EventCode.EnterThePitch, MCConstants.EventType.EVENT_ENTERTHEPITCH, formationBean.id, eventTime);
+                            mMatchFragment.generateEvent(EventCode.EnterThePitch, MCConstants.EventType.EVENT_ENTERTHEPITCH, formationBean.id, "", -1, eventTime);
                         }
                     }
                 }
@@ -1034,15 +1033,15 @@ public class StatsOperateActivity extends BaseActivity {
                 if (mMatchFragment != null) { //通知球员号码背景颜色变化
                     long eventTime = System.currentTimeMillis();
                     if (code == EventCode.KickOffFirstHalf) { //比赛开始传比赛开始和上半场开始两个事件
-                        mMatchFragment.generateEvent(EventCode.Begin, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                        mMatchFragment.generateEvent(EventCode.Begin, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                     }
                     if (code == EventCode.Finish && hasPenalty) { //记两个事件［点球大战结束，全场结束（按撤销时一并撤销
                         matchProcess = EventCode.PenaltyShootOutFinish;
-                        mMatchFragment.generateEvent(EventCode.PenaltyShootOutFinish, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                        mMatchFragment.generateEvent(EventCode.PenaltyShootOutFinish, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                     }
                     mMatchFragment.changePlayerBackground(isPlaying, false);
                     matchProcess = code;
-                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                 }
             }
 
@@ -1070,13 +1069,13 @@ public class StatsOperateActivity extends BaseActivity {
                 if (mMatchFragment != null) { //通知球员号码背景颜色变化
                     mMatchFragment.changePlayerBackground(isPlaying, false);
                     if (code == EventCode.Finish && !hasExtraTime && !hasPenalty) { //全场结束记两个事件［下半场结束、全场结束
-                        mMatchFragment.generateEvent(EventCode.FullTime, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                        mMatchFragment.generateEvent(EventCode.FullTime, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                     } else if (code == EventCode.Finish && hasExtraTime && !hasPenalty) { //加时下结束后点击全场结束不需要多传事件
                         if (!tvRight1.getText().equals(getString(R.string.match_extra_time_full_time))) { //加时下点全场结束记两个事件［加时赛下半场结束、全场结束]
-                            mMatchFragment.generateEvent(EventCode.ExtraTimeFullTime, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                            mMatchFragment.generateEvent(EventCode.ExtraTimeFullTime, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                         }
                     }
-                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                 }
             }
 
@@ -1094,7 +1093,7 @@ public class StatsOperateActivity extends BaseActivity {
                 if (mMatchFragment != null) { //通知球员号码背景颜色变化
                     mMatchFragment.changePlayerBackground(isPlaying, false);
                     long eventTime = System.currentTimeMillis();
-                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, eventTime);
+                    mMatchFragment.generateEvent(code, MCConstants.EventType.EVENT_PROCESS, null, null, -1, eventTime);
                 }
             }
         });
@@ -1164,6 +1163,7 @@ public class StatsOperateActivity extends BaseActivity {
         //注册本地广播，监听返回的结果
         registerBroadcast();
     }
+
 
     /**
      * 监听导出数据返回结果

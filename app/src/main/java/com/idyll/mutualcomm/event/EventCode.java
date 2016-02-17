@@ -114,6 +114,7 @@ public class EventCode {
         sEventNameMap.put(ShotOffTarget, MCConstants.application.getString(R.string.shot_off_target));
         sEventNameMap.put(SuccessfulPass, MCConstants.application.getString(R.string.successful_pass));
         sEventNameMap.put(UnsuccessfulPass, MCConstants.application.getString(R.string.unsuccessful_pass));
+        sEventNameMap.put(UnsuccessfulPass, MCConstants.application.getString(R.string.unsuccessful_pass));
         sEventNameMap.put(SuccessfulTakeOn, MCConstants.application.getString(R.string.successful_take_on));
         sEventNameMap.put(UnsuccessfulTakeOn, MCConstants.application.getString(R.string.unsuccessful_take_on));
         sEventNameMap.put(TackleWon, MCConstants.application.getString(R.string.tackle_won));

@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.adapter.MCPlayerAdapter;
 import com.idyll.mutualcomm.comm.MCConstants;
-import com.idyll.mutualcomm.entity.MCPlayerTextItem;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.view.MCGridView;
 import com.sponia.foundationmoudle.BaseActivity;
@@ -33,9 +32,9 @@ public class ChoosePlayerActivity extends BaseActivity implements AdapterView.On
     //球员GridView
     private MCGridView gvPlayer;
     private MCPlayerAdapter adapter;
-    private ArrayList<MCPlayerTextItem> totalPlayers = new ArrayList<>();
+    private ArrayList<StatsMatchFormationBean> totalPlayers = new ArrayList<>();
     //所选中首发球员
-    private ArrayList<MCPlayerTextItem> fieldPlayers = new ArrayList<>();
+    private ArrayList<StatsMatchFormationBean> fieldPlayers = new ArrayList<>();
     //所选中球员position
 //    private int mSelectedPosition = -1;
     //matchId
@@ -67,7 +66,7 @@ public class ChoosePlayerActivity extends BaseActivity implements AdapterView.On
     private void initData() {
         if (getIntent() != null) {
             for (String number : playerNums) {
-                totalPlayers.add(new MCPlayerTextItem(new StatsMatchFormationBean("", number)));
+                totalPlayers.add(new StatsMatchFormationBean("", number));
                 LogUtil.defaultLog("playerNums---->" + number);
             }
 //            totalPlayers = getIntent().getParcelableArrayListExtra(MCConstants.TOTAL_PLAYERS);
@@ -80,7 +79,7 @@ public class ChoosePlayerActivity extends BaseActivity implements AdapterView.On
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MCPlayerTextItem MCPlayerTextItem = (MCPlayerTextItem) adapter.getItem(position);
+        StatsMatchFormationBean MCPlayerTextItem = (StatsMatchFormationBean) adapter.getItem(position);
         if (MCPlayerTextItem == null) {
             return;
         }
@@ -127,7 +126,7 @@ public class ChoosePlayerActivity extends BaseActivity implements AdapterView.On
      */
     private void skip2StatsPage() {
         Intent intent = new Intent(this, StatsActivity.class);
-        for (MCPlayerTextItem MCPlayerTextItem : fieldPlayers) {
+        for (StatsMatchFormationBean MCPlayerTextItem : fieldPlayers) {
             MCPlayerTextItem.selected = false;
         }
         Collections.sort(fieldPlayers);

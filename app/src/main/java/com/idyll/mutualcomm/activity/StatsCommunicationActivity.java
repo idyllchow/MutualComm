@@ -112,10 +112,9 @@ public class StatsCommunicationActivity extends BaseActivity {
 //                    }
                     Intent intent = new Intent(StatsCommunicationActivity.this, StatsOperateActivity.class);
                     intent.putExtra("playerList", totalPlayers);
-                    intent.putExtra("matchId", "matchId");
+                    intent.putExtra("matchId", "matchIdSponia");
                     intent.putExtra("ip", ip);
                     intent.putExtra("port", Integer.parseInt(metPort.getText().toString()));
-                    intent.putExtra("matchID", "matchIdSponia");
                     intent.putExtra("teamId", "teamIdSponia");
                     intent.putExtra("matchType", 9);
                     startActivity(intent);

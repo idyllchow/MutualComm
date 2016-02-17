@@ -4,30 +4,21 @@
         <layer-list>
             <item>
                 <shape android:shape="oval">
-                    <solid android:color="#4a4a4a" />
-                    <stroke android:width="0.5dp" android:color="#545454" />
+                    <solid android:color="@color/white" />
                 </shape>
             </item>
-            <item android:bottom="2dp" android:left="2dp" android:right="2dp" android:top="2dp">
-                <shape android:shape="oval">
-                    <solid android:color="#5c5c5c" />
-                </shape>
-            </item>
+
         </layer-list>
     </item>
     <item android:state_selected="true">
         <layer-list>
             <item>
                 <shape android:shape="oval">
-                    <solid android:color="#4a4a4a" />
-                    <stroke android:width="0.5dp" android:color="#545454" />
+                    <solid android:color="@color/white" />
+
                 </shape>
             </item>
-            <item android:bottom="2dp" android:left="2dp" android:right="2dp" android:top="2dp">
-                <shape android:shape="oval">
-                    <solid android:color="#5c5c5c" />
-                </shape>
-            </item>
+
         </layer-list>
     </item>
 </selector>

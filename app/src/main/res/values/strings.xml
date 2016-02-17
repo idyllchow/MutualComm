@@ -55,6 +55,7 @@
     <string name="pass_ball">传球</string>
     <string name="successful_pass">传球成功</string>
     <string name="unsuccessful_pass">传球失败</string>
+    <string name="line_pass">传给</string>
     <string name="successful_take_on">过人成功</string>
     <string name="unsuccessful_take_on">过人失败</string>
     <string name="tackle">抢断</string>

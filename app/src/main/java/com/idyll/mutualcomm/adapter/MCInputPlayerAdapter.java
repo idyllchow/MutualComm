@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.idyll.mutualcomm.BuildConfig;
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.entity.MCPlayerTextItem;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.sponia.foundationmoudle.utils.LogUtil;
 import com.sponia.foundationmoudle.utils.SponiaToastUtil;
@@ -31,7 +30,7 @@ import java.util.UUID;
  * @date 15/12/1
  */
 public class MCInputPlayerAdapter extends BaseAdapter {
-    private ArrayList<MCPlayerTextItem> players;
+    private ArrayList<StatsMatchFormationBean> players;
     private final LayoutInflater mInflater;
 
     private int mItemWidth;
@@ -43,7 +42,7 @@ public class MCInputPlayerAdapter extends BaseAdapter {
     //上下文
     private Context mContext;
 
-    public MCInputPlayerAdapter(Context context, ArrayList<MCPlayerTextItem> players) {
+    public MCInputPlayerAdapter(Context context, ArrayList<StatsMatchFormationBean> players) {
         this.players = players;
         this.mContext = context;
         mInflater = LayoutInflater.from(mContext);
@@ -76,7 +75,7 @@ public class MCInputPlayerAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-        MCPlayerTextItem item = players.get(position);
+        StatsMatchFormationBean item = players.get(position);
         if (players != null) {
             holder.tvPlayer.setTextColor(mContext.getResources().getColor(R.color.white));
             if (position == players.size() - 1) {
@@ -92,9 +91,9 @@ public class MCInputPlayerAdapter extends BaseAdapter {
                 //TODO for test
                 if (BuildConfig.DEBUG) {
                     for (int i = 0; i < players.size(); i++) {
-                        item.player.id = UUID.randomUUID().toString();
-                        if (!TextUtils.isEmpty(item.player.Player_Num)) {
-                            holder.tvPlayer.setText(item.player.Player_Num + "");
+                        item.id = UUID.randomUUID().toString();
+                        if (!TextUtils.isEmpty(item.Player_Num)) {
+                            holder.tvPlayer.setText(item.Player_Num + "");
                         }
                     }
                 }
@@ -109,7 +108,7 @@ public class MCInputPlayerAdapter extends BaseAdapter {
             holder.tvPlayer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MCPlayerTextItem newPlayer = new MCPlayerTextItem(new StatsMatchFormationBean("", ""));
+                    StatsMatchFormationBean newPlayer = new StatsMatchFormationBean("", "");
                     players.add(newPlayer);
                     notifyDataSetChanged();
                 }
@@ -135,11 +134,11 @@ public class MCInputPlayerAdapter extends BaseAdapter {
      *
      * @return
      */
-    public ArrayList<MCPlayerTextItem> getRegisterPlayers() {
+    public ArrayList<StatsMatchFormationBean> getRegisterPlayers() {
         int size = players.size();
-        ArrayList<MCPlayerTextItem> registerPlayer = new ArrayList<>();
+        ArrayList<StatsMatchFormationBean> registerPlayer = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            if (!TextUtils.isEmpty(players.get(i).player.id)) {
+            if (!TextUtils.isEmpty(players.get(i).id)) {
                 registerPlayer.add(players.get(i));
             }
         }
@@ -161,15 +160,15 @@ public class MCInputPlayerAdapter extends BaseAdapter {
             public void onClick(DialogInterface dialog, int which) {
                 String shirtNumber = TextUtils.isEmpty(editText.getText().toString().trim()) ? "" : editText.getText().toString().trim();
                 try {
-                    for (MCPlayerTextItem item : players) {
-                        if (shirtNumber.equals(item.player.Player_Num)) {
+                    for (StatsMatchFormationBean item : players) {
+                        if (shirtNumber.equals(item.Player_Num)) {
                             SponiaToastUtil.showShortToast("号码" + shirtNumber + "已注册,请输入其它号码");
                             return;
                         }
                     }
                     view.setText(shirtNumber);
-                    players.get(position).player.Player_Num = shirtNumber;
-                    players.get(position).player.id = UUID.randomUUID().toString();
+                    players.get(position).Player_Num = shirtNumber;
+                    players.get(position).id = UUID.randomUUID().toString();
                 } catch (NumberFormatException e) {
                     LogUtil.defaultLog(e);
                 }

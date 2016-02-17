@@ -39,7 +39,6 @@ import java.util.Collections;
  * @auther shibo
  */
 public class StatsTransitionFragment extends StatsBaseFragment {
-    private static final String TAG = "Player";
     private static final boolean DEBUG = false;
     private ArrayList<StatsMatchFormationBean> mRightItems = new ArrayList<>();
     private ArrayList<StatsMatchFormationBean> mLeftItems = new ArrayList<>(12);
@@ -163,7 +162,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
         mDragRightGridView.setOnSwapItemCallback(new StatsDragGridView.OnSwapItemCallback() {
             @Override
             public int onSwapItem(final int moveX, final int moveY, final int oldPos) {
-                LogUtil.e(TAG, "onSwapItem() moveX: " + moveX + ", moveY: " + moveY + ", oldPos: " + oldPos);
                 if (!mAnimationEnd) {
                     return AdapterView.INVALID_POSITION;
                 }
@@ -173,9 +171,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
 //                    adjustMoveX = mGaps + 1;
 //                }
                 final int newPos = mDragLeftGridView.pointToPosition(adjustMoveX, moveY);
-                if (DEBUG) {
-                    LogUtil.e(TAG, "newPos: " + newPos + ", left: " + left);
-                }
                 if (newPos != AdapterView.INVALID_POSITION && mAnimationEnd) {
                     swapRightToLeft(oldPos, newPos);
                 }
@@ -193,9 +188,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
                         final int newY = newView.getTop();
                         final int oldX = oldView.getLeft() + left;
                         final int oldY = oldView.getTop();
-                        if (DEBUG) {
-                            LogUtil.e(TAG, "newX: " + newX + ", newY: " + newY + ", oldX: " + oldX + ", oldY: " + oldY);
-                        }
                         swapAnimate(oldView, newX, oldX, newY, oldY);
                     }
                 }
@@ -239,9 +231,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
                                     final int newY = newView.getTop() + itemTop;
                                     final int oldX = oldView.getLeft() + left;
                                     final int oldY = oldView.getTop();
-                                    if (DEBUG) {
-                                        LogUtil.e(TAG, "newX: " + newX + ", newY: " + newY + ", oldX: " + oldX + ", oldY: " + oldY);
-                                    }
                                     swapAnimate(newView, oldX, newX, oldY, newY);
                                 }
                                 return true;
@@ -260,14 +249,12 @@ public class StatsTransitionFragment extends StatsBaseFragment {
         mDragLeftGridView.setOnSwapItemCallback(new DragGridView.OnSwapItemCallback() {
             @Override
             public int onSwapItem(int moveX, int moveY, int oldPos) {
-                LogUtil.e(TAG, "onSwapItem() moveX: " + moveX + ", moveY: " + moveY + ", oldPos: " + oldPos);
                 if (!mAnimationEnd) {
                     return AdapterView.INVALID_POSITION;
                 }
                 final int left = mDragRightGridView.getLeft();
                 int adjustMoveX = moveX - left;
                 final int newPos = mDragRightGridView.pointToPosition(adjustMoveX, moveY);
-                LogUtil.e(TAG, "newPos: " + newPos + ", left: " + left);
                 if (newPos != AdapterView.INVALID_POSITION && mAnimationEnd) {
                     swapLeftToRight(oldPos, newPos);
                 }
@@ -285,9 +272,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
                         final int newY = newView.getTop();
                         final int oldX = oldView.getLeft();
                         final int oldY = oldView.getTop();
-                        if (DEBUG) {
-                            LogUtil.e(TAG, "newX: " + newX + ", newY: " + newY + ", oldX: " + oldX + ", oldY: " + oldY);
-                        }
                         swapAnimate(oldView, newX, oldX, newY, oldY);
                     }
                 }
@@ -329,9 +313,6 @@ public class StatsTransitionFragment extends StatsBaseFragment {
                                     final int newY = newView.getTop();
                                     final int oldX = oldView.getLeft();
                                     final int oldY = oldView.getTop();
-                                    if (DEBUG) {
-                                        LogUtil.e(TAG, "newX: " + newX + ", newY: " + newY + ", oldX: " + oldX + ", oldY: " + oldY);
-                                    }
                                     swapAnimate(newView, oldX, newX, oldY, newY);
                                 }
                                 return true;
@@ -421,8 +402,8 @@ public class StatsTransitionFragment extends StatsBaseFragment {
         //上场球员
         StatsMatchFormationBean[] onFieldArray = new StatsMatchFormationBean[matchType];
         for (StatsMatchFormationBean player : onFieldList) {
-            if (player.position < matchType) {
-                onFieldArray[player.position] = player;
+            if (player.index < matchType) {
+                onFieldArray[player.index] = player;
             } else { //比赛过程中修改人制,多出的球员移为替补
                 offFieldList.add(player);
             }
@@ -438,7 +419,7 @@ public class StatsTransitionFragment extends StatsBaseFragment {
         for (StatsMatchFormationBean player : offFieldList) {
             //TODO 未能复现的越界,
             try {
-                offFieldArray[player.position] = player;
+                offFieldArray[player.index] = player;
             } catch (ArrayIndexOutOfBoundsException e) {
                 LogUtil.defaultLog(e);
             }
@@ -476,7 +457,7 @@ public class StatsTransitionFragment extends StatsBaseFragment {
             for (StatsMatchFormationBean player : mLeftItems) {
                 if (null != player) {
                     player.onField = true;
-                    player.position = mLeftItems.indexOf(player);
+                    player.index = mLeftItems.indexOf(player);
                     result.add(player);
                 }
             }
@@ -492,7 +473,7 @@ public class StatsTransitionFragment extends StatsBaseFragment {
             for (StatsMatchFormationBean player : mRightItems) {
                 if (null != player) {
                     player.onField = false;
-                    player.position = mRightItems.indexOf(player);
+                    player.index = mRightItems.indexOf(player);
                     result.add(player);
                 }
             }
