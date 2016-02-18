@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.sponia.foundationmoudle.bean.SponiaBaseBean;
 
+
 /**
  * @packageName com.sponia.soccerstats.bean
  * @description 比赛阵容Bean

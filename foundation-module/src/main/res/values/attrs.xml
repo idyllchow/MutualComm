@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="FontTextView">
+        <attr name="fontStyle" format="enum">
+            <enum name="dim_bold" value="0"/>
+            <enum name="lexia_bold" value="1"/>
+            <enum name="lexia_regular" value="2"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ClickDrawableMaskImageView">
+        <attr name="clickMaskEnable" format="boolean"/>
+        <attr name="clickMaskColor" format="color|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="tg_gridLayout">
+        <attr name="tg_gap" format="dimension"/>
+        <attr name="tg_columns" format="integer"/>
+        <attr name="tg_gravity">
+            <flag name="top" value="0x01"/>
+            <flag name="center" value="0x02"/>
+            <flag name="bottom" value="0x03"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="ProgressWheel">
+        <attr name="matProg_progressIndeterminate" format="boolean"/>
+        <attr name="matProg_barColor" format="color"/>
+        <attr name="matProg_rimColor" format="color"/>
+        <attr name="matProg_rimWidth" format="dimension"/>
+        <attr name="matProg_spinSpeed" format="float"/>
+        <attr name="matProg_barSpinCycleTime" format="integer"/>
+        <attr name="matProg_circleRadius" format="dimension"/>
+        <attr name="matProg_fillRadius" format="boolean"/>
+        <attr name="matProg_barWidth" format="dimension"/>
+        <attr name="matProg_linearProgress" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="ShadowLayout">
+        <attr name="sl_cornerRadius" format="dimension"/>
+        <attr name="sl_shadowRadius" format="dimension"/>
+        <attr name="sl_shadowColor" format="color"/>
+        <attr name="sl_dx" format="dimension"/>
+        <attr name="sl_dy" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="Rotate3dAnimation">
+        <attr name="rollType" format="enum">
+            <enum name="x" value="0"/>
+            <enum name="y" value="1"/>
+            <enum name="z" value="2"/>
+        </attr>
+        <attr name="fromDeg" format="float"/>
+        <attr name="toDeg" format="float"/>
+        <attr name="pivotX" format="fraction"/>
+        <attr name="pivotY" format="fraction"/>
+    </declare-styleable>
+
+    <declare-styleable name="CoolBar">
+        <attr name="coolMode" format="enum">
+            <enum name="homeMode" value="0" />
+            <enum name="searchMode" value="1" />
+            <enum name="backMode" value="2" />
+        </attr>
+        <attr name="showBottomLine" format="boolean" />
+        <attr name="showMenu" format="boolean" />
+        <attr name="showNews" format="boolean" />
+        <attr name="showSelectTick" format="boolean" />
+        <attr name="showShareView" format="boolean" />
+        <attr name="coolTitle" format="string" />
+        <attr name="newsLogoSrc" format="integer" />
+    </declare-styleable>
+
+</resources>

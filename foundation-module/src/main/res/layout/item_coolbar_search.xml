@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:background="@color/blue">
+
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="24dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:src="@mipmap/btn_nav_back"
+        android:scaleType="center"
+        tools:ignore="ContentDescription" />
+    <View
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:id="@+id/v_back"
+        />
+
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/met_content"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="72dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_gravity="center_vertical"
+        android:hint="输入球员姓名、OPID或手机号"
+
+        android:textSize="17sp"
+        android:imeOptions="actionSearch"
+        tools:ignore="HardcodedText" />
+
+    <View
+        android:id="@+id/v_bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="#dcdcdc"
+        android:visibility="visible" />
+</FrameLayout>

@@ -8,6 +8,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.SaveCallback;
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.socket.MCSocketServer;
@@ -16,6 +19,7 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 import com.sponia.foundationmoudle.BaseActivity;
 import com.sponia.foundationmoudle.common.PreventContinuousClick;
 import com.sponia.foundationmoudle.utils.CellphoneUtil;
+import com.sponia.foundationmoudle.utils.LogUtil;
 import com.sponia.foundationmoudle.utils.SponiaToastUtil;
 
 import java.util.ArrayList;
@@ -71,8 +75,21 @@ public class StatsCommunicationActivity extends BaseActivity {
             metIp.setText(NetWorkUtil.getIP());
             addPlayers();
         }
+        initLeancloud();
     }
 
+    private void initLeancloud() {
+        AVObject testObject = new AVObject("TestObject");
+        testObject.put("words","Hello Sponia!");
+        testObject.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(AVException e) {
+                if(e == null){
+                    LogUtil.defaultLog("success for leancloud!");
+                }
+            }
+        });
+    }
 
     private void addPlayers() {
         for (String number : playerNums) {

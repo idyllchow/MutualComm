@@ -1,1 +1,1 @@
-include ':app', ':mutualcommserver'
+include ':app', ':mutualcommserver', ':foundation', ':foundation-module'

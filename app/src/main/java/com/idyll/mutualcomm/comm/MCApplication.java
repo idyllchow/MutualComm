@@ -3,6 +3,7 @@ package com.idyll.mutualcomm.comm;
 import android.app.Activity;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.avos.avoscloud.AVOSCloud;
 import com.idyll.mutualcomm.event.DaoMaster;
 import com.idyll.mutualcomm.event.DaoSession;
 import com.sponia.foundationmoudle.common.Common;
@@ -33,11 +34,11 @@ public class MCApplication extends SponiaBaseApplication {
         mInstance = this;
         Common.application = this;
         setupDatabase();
+        // 初始化参数依次为 this, AppId, AppKey
+        AVOSCloud.initialize(this, "LaOIJplvEIVWOvdYkiH85plx-gzGzoHsz", "5lT4DM9YGBH3cidEXveiSwGQ");
+        // 启用北美节点
+//        AVOSCloud.useAVCloudUS();
     }
-
-//    public static Context getContext() {
-//        return mContext;
-//    }
 
     public static MCApplication getInstance() {
         return mInstance;
