@@ -6,7 +6,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import com.idyll.mutualcomm.comm.MCConstants;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.sponia.foundationmoudle.common.Common;
 import com.sponia.foundationmoudle.utils.LogUtil;
 

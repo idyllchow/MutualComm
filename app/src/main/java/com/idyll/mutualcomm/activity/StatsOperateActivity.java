@@ -28,13 +28,14 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.comm.MCConstants;
-import com.idyll.mutualcomm.comm.SpCode;
+import com.idyll.mutualcomm.global.MCConstants;
+import com.idyll.mutualcomm.global.SpCode;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.event.EventCode;
 import com.idyll.mutualcomm.event.RecordFactory;
 import com.idyll.mutualcomm.fragment.statistics.StatsMatchFragment;
 import com.idyll.mutualcomm.fragment.statistics.StatsTransitionFragment;
+import com.idyll.mutualcomm.talk.GroupTalkHelper;
 import com.idyll.mutualcomm.utils.AnimationUtil;
 import com.idyll.mutualcomm.view.PopTipView.PopTipRelativeLayout;
 import com.idyll.mutualcomm.view.PopTipView.PopTipView;
@@ -1308,6 +1309,7 @@ public class StatsOperateActivity extends BaseActivity {
                 return null;
             }
         }.execute();
+
     }
 
     private void sendMsg(String msg, String playerNum, String eventCode, String matchTime, String clientStartAt) {

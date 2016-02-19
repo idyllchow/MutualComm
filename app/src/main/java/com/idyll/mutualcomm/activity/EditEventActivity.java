@@ -26,11 +26,11 @@ import android.widget.PopupWindow;
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.adapter.MCActionDetailAdapter;
 import com.idyll.mutualcomm.adapter.MCEventAdapter;
-import com.idyll.mutualcomm.comm.MCConstants;
 import com.idyll.mutualcomm.entity.EditActionItem;
 import com.idyll.mutualcomm.event.EventCode;
 import com.idyll.mutualcomm.event.MCRecordData;
 import com.idyll.mutualcomm.event.RecordFactory;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.idyll.mutualcomm.view.MCGridView;
 import com.sponia.foundationmoudle.BaseActivity;
 import com.sponia.foundationmoudle.utils.CellphoneUtil;
@@ -149,6 +149,8 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
         dbList.clear();
         dbList.addAll(RecordFactory.queryRecords(matchId, teamId));
         eventAdapter.notifyDataSetChanged();
+
+//        jerryReceiveMsgFromTom();
     }
 
     class SocketHandler extends Handler {
@@ -548,6 +550,21 @@ public class EditEventActivity extends BaseActivity implements AdapterView.OnIte
         animator.setDuration(150);
         animator.start();
     }
+
+//    private void jerryReceiveMsgFromTom(){
+//        //Jerry登录
+//        AVIMClient jerry = AVIMClient.getInstance("Bob");
+//        jerry.open(new AVIMClientCallback() {
+//
+//            @Override
+//            public void done(AVIMClient client, AVIMException e) {
+//                if (e == null) {
+//                    LogUtil.defaultLog("Bob login");
+//                    SponiaToastUtil.showShortToast("Bob login");
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onBackPressed() {

@@ -21,7 +21,7 @@ import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.activity.StatsOperateActivity;
 import com.idyll.mutualcomm.adapter.StatsPlayerGVAdapter;
 import com.idyll.mutualcomm.adapter.SubstitutionDragAdapter;
-import com.idyll.mutualcomm.comm.MCConstants;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.fragment.StatsBaseFragment;
 import com.idyll.mutualcomm.view.DragGridView;

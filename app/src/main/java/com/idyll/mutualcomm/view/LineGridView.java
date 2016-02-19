@@ -16,7 +16,7 @@ import android.widget.GridView;
 import android.widget.ListAdapter;
 
 import com.idyll.mutualcomm.adapter.StatsPlayerAdapter;
-import com.idyll.mutualcomm.comm.MCConstants;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.sponia.foundationmoudle.utils.LogUtil;
 
 import java.util.ArrayList;

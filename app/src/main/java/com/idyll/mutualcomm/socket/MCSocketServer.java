@@ -1,6 +1,6 @@
 package com.idyll.mutualcomm.socket;
 
-import com.idyll.mutualcomm.comm.SpCode;
+import com.idyll.mutualcomm.global.SpCode;
 import com.sponia.foundationmoudle.utils.LogUtil;
 import com.sponia.foundationmoudle.utils.SponiaSpUtil;
 

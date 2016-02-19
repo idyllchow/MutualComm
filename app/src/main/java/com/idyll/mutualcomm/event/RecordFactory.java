@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.idyll.mutualcomm.comm.MCApplication;
+import com.idyll.mutualcomm.global.MCApplication;
 import com.sponia.foundationmoudle.utils.LogUtil;
 import com.sponia.foundationmoudle.utils.TimeUtil;
 

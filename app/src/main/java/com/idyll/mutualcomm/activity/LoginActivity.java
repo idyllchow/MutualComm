@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.comm.SpCode;
+import com.idyll.mutualcomm.global.SpCode;
 import com.sponia.foundationmoudle.BaseActivity;
 import com.sponia.foundationmoudle.common.PreventContinuousClick;
 import com.sponia.foundationmoudle.utils.SponiaSpUtil;

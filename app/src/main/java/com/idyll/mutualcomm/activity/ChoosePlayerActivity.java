@@ -9,7 +9,7 @@ import android.widget.AdapterView;
 
 import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.adapter.MCPlayerAdapter;
-import com.idyll.mutualcomm.comm.MCConstants;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.view.MCGridView;
 import com.sponia.foundationmoudle.BaseActivity;

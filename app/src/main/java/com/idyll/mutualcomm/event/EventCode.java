@@ -1,7 +1,7 @@
 package com.idyll.mutualcomm.event;
 
 import com.idyll.mutualcomm.R;
-import com.idyll.mutualcomm.comm.MCConstants;
+import com.idyll.mutualcomm.global.MCConstants;
 
 import java.util.HashMap;
 

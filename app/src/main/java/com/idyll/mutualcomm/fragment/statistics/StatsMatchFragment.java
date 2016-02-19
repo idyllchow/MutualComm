@@ -21,7 +21,6 @@ import com.idyll.mutualcomm.R;
 import com.idyll.mutualcomm.activity.StatsOperateActivity;
 import com.idyll.mutualcomm.adapter.StatsActionAdapter;
 import com.idyll.mutualcomm.adapter.StatsPlayerAdapter;
-import com.idyll.mutualcomm.comm.MCConstants;
 import com.idyll.mutualcomm.entity.StatsActionItem;
 import com.idyll.mutualcomm.entity.StatsMatchFormationBean;
 import com.idyll.mutualcomm.event.EventCode;
@@ -29,6 +28,7 @@ import com.idyll.mutualcomm.event.EventHelper;
 import com.idyll.mutualcomm.event.MCRecordData;
 import com.idyll.mutualcomm.event.RecordFactory;
 import com.idyll.mutualcomm.fragment.StatsBaseFragment;
+import com.idyll.mutualcomm.global.MCConstants;
 import com.idyll.mutualcomm.receiver.NetBroadcastReceiver;
 import com.idyll.mutualcomm.view.LineGridView;
 import com.sponia.foundationmoudle.utils.BigDecimalUtil;
@@ -623,7 +623,9 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
             mSelectedPlayer = null;
             mPlayerAdapter.notifyDataSetChanged();
         }
-
+//        if (code == EventCode.ShotOnTarget || code == EventCode.ShotOffTarget) {
+//            initLeancloud(code + "");
+//        }
         return currentTime;
     }
 
@@ -872,5 +874,8 @@ public class StatsMatchFragment extends StatsBaseFragment implements AdapterView
         return resultList;
     }
 
-
+//    private void initLeancloud(String msg) {
+//        SponiaToastUtil.showShortToast("send leandcloud!");
+//        GroupTalkHelper.sendMessageToJerryFromTom(msg);
+//    }
 }
